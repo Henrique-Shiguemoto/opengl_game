@@ -1,51 +1,69 @@
 #include <iostream>
 
-#define SDL_MAIN_HANDLED
-#include "SDL2/SDL.h"
+typedef char i8;
+typedef short i16;
+typedef int i32;
+typedef long int i64;
+typedef float f32;
+typedef double f64;
+typedef bool b8;
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef unsigned long long u64;
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define SDL_MAIN_HANDLED
+#include "SDL2/SDL.h"
+
 #include <glad/glad.h>
 
-#define GAME_NAME "OpenGL Game"
-#define WINDOW_WIDTH 800 
-#define WINDOW_HEIGHT 600
+#define GAME_NAME 		"OpenGL Game"
+#define WINDOW_WIDTH 	800
+#define WINDOW_HEIGHT 	600
+#define ASPECT_RATIO 	((f32)WINDOW_WIDTH / (f32)WINDOW_HEIGHT)
+
+struct PerformanceData{
+	u32 currentTime 				= 0;
+	u32 lastTime 					= 0;
+	u32 framesSinceFrametimeUpdate 	= 0;
+	u32 framesPerUpdate 			= 60;
+	u32 frameTimeSum 				= 0;
+};
 
 SDL_Window* g_Window;
 SDL_GLContext g_OpenGLContext;
-bool g_GameIsRunning = true;
+b8 g_GameIsRunning = true;
 
-float r = 0.0f;
-float g = 0.0f;
-float b = 0.0f;
+f32 r = 0.0f;
+f32 g = 0.0f;
+f32 b = 0.0f;
 
-bool Init();
+b8 Init();
 void HandleInput();
 void SimulateWorld();
 void RenderGraphics();
 void Quit();
 
-int main(){
+i32 main(){
 	if(!Init()) return 1;
 
-	unsigned int currentTime = 0;
-	unsigned int lastTime = SDL_GetTicks();
-	unsigned int framesSinceFrametimeUpdate = 0;
-	unsigned int framesPerUpdate = 60;
-	unsigned int frameTimeSum = 0;
+	PerformanceData perfData;
 
 	while(g_GameIsRunning){
-		currentTime = SDL_GetTicks();
-		if(framesSinceFrametimeUpdate >= framesPerUpdate){
-			std::string newWindowTitle = GAME_NAME" - Frametime (ms): " + std::to_string((float)frameTimeSum / (float)framesPerUpdate);
+		perfData.currentTime = SDL_GetTicks();
+		if(perfData.framesSinceFrametimeUpdate >= perfData.framesPerUpdate){
+			std::string newWindowTitle = GAME_NAME" - Frametime (ms): " + std::to_string((f32)perfData.frameTimeSum / (f32)perfData.framesPerUpdate);
 			SDL_SetWindowTitle(g_Window, newWindowTitle.c_str());
-			framesSinceFrametimeUpdate = 0;
-			frameTimeSum = 0;
+			perfData.framesSinceFrametimeUpdate = 0;
+			perfData.frameTimeSum = 0;
 		}
-		frameTimeSum += currentTime - lastTime;
-		lastTime = currentTime;
-		framesSinceFrametimeUpdate++;
+		perfData.frameTimeSum += (perfData.currentTime - perfData.lastTime);
+		perfData.lastTime = perfData.currentTime;
+		perfData.framesSinceFrametimeUpdate++;
 
 		HandleInput();
 		SimulateWorld();
@@ -55,7 +73,7 @@ int main(){
 	Quit();
 }
 
-bool Init(void){
+b8 Init(void){
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
 		std::cout << "SDL2 Couldn't Initialize!\n" << std::endl;
 		return false;
@@ -67,8 +85,8 @@ bool Init(void){
 		return false;
 	}
 
-	int iconWidth, iconHeight, iconChannelCount;
-	unsigned char* iconPixels = stbi_load("assets/spaceship.png", &iconWidth, &iconHeight, &iconChannelCount, 0);
+	i32 iconWidth, iconHeight, iconChannelCount;
+	u8* iconPixels = stbi_load("assets/spaceship.png", &iconWidth, &iconHeight, &iconChannelCount, 0);
 	if(!iconPixels){
 		std::cout << "Couldn't load icon image" << std::endl;
 		return false;
@@ -113,9 +131,9 @@ bool Init(void){
 
 void HandleInput(void){
 	SDL_Event e;
-	float colorIncrement = 0.01f;
+	f32 colorIncrement = 0.01f;
 	while(SDL_PollEvent(&e)){
-		const unsigned char* keyboardState = SDL_GetKeyboardState(NULL);
+		const u8* keyboardState = SDL_GetKeyboardState(NULL);
 
 		if(e.type == SDL_QUIT || keyboardState[SDL_SCANCODE_ESCAPE]){
 			g_GameIsRunning = false;
