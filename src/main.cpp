@@ -19,13 +19,11 @@ f32 b = 0.0f;
 
 i32 main(){
 	if(!Init()) return 1;
-
 	while(g_GameIsRunning){
 		HandleInput();
 		SimulateWorld();
 		RenderGraphics();
 	}
-
 	Quit();
 }
 
@@ -117,8 +115,7 @@ void HandleInput(){
 	}
 }
 
-void SimulateWorld(){
-
+void SimulateWorld(){ 
 }
 
 void RenderGraphics(){
