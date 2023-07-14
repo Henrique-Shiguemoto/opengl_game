@@ -1,70 +1,26 @@
 #include <iostream>
-
-typedef char i8;
-typedef short i16;
-typedef int i32;
-typedef long int i64;
-typedef float f32;
-typedef double f64;
-typedef bool b8;
-
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned long long u64;
+#include <glad/glad.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #define SDL_MAIN_HANDLED
 #include "SDL2/SDL.h"
-
-#include <glad/glad.h>
-
-#define GAME_NAME 		"OpenGL Game"
-#define WINDOW_WIDTH 	800
-#define WINDOW_HEIGHT 	600
-#define ASPECT_RATIO 	((f32)WINDOW_WIDTH / (f32)WINDOW_HEIGHT)
-
-struct PerformanceData{
-	u32 currentTime 				= 0;
-	u32 lastTime 					= 0;
-	u32 framesSinceFrametimeUpdate 	= 0;
-	u32 framesPerUpdate 			= 60;
-	u32 frameTimeSum 				= 0;
-};
+#include "main.h"
 
 SDL_Window* g_Window;
 SDL_GLContext g_OpenGLContext;
 b8 g_GameIsRunning = true;
+PerformanceData g_PerData;
 
 f32 r = 0.0f;
 f32 g = 0.0f;
 f32 b = 0.0f;
 
-b8 Init();
-void HandleInput();
-void SimulateWorld();
-void RenderGraphics();
-void Quit();
-
 i32 main(){
 	if(!Init()) return 1;
 
-	PerformanceData perfData;
-
 	while(g_GameIsRunning){
-		perfData.currentTime = SDL_GetTicks();
-		if(perfData.framesSinceFrametimeUpdate >= perfData.framesPerUpdate){
-			std::string newWindowTitle = GAME_NAME" - Frametime (ms): " + std::to_string((f32)perfData.frameTimeSum / (f32)perfData.framesPerUpdate);
-			SDL_SetWindowTitle(g_Window, newWindowTitle.c_str());
-			perfData.framesSinceFrametimeUpdate = 0;
-			perfData.frameTimeSum = 0;
-		}
-		perfData.frameTimeSum += (perfData.currentTime - perfData.lastTime);
-		perfData.lastTime = perfData.currentTime;
-		perfData.framesSinceFrametimeUpdate++;
-
 		HandleInput();
 		SimulateWorld();
 		RenderGraphics();
@@ -73,7 +29,7 @@ i32 main(){
 	Quit();
 }
 
-b8 Init(void){
+b8 Init(){
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
 		std::cout << "SDL2 Couldn't Initialize!\n" << std::endl;
 		return false;
@@ -129,7 +85,9 @@ b8 Init(void){
 	return true;
 }
 
-void HandleInput(void){
+void HandleInput(){
+	UpdateFrametimeInWindowTitle(g_PerData);
+
 	SDL_Event e;
 	f32 colorIncrement = 0.01f;
 	while(SDL_PollEvent(&e)){
@@ -159,14 +117,27 @@ void HandleInput(void){
 	}
 }
 
-void SimulateWorld(void){
+void SimulateWorld(){
 
 }
 
-void RenderGraphics(void){
+void RenderGraphics(){
 	glClearColor(r, g, b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	SDL_GL_SwapWindow(g_Window);
+}
+
+void UpdateFrametimeInWindowTitle(PerformanceData& perfData){
+	perfData.currentTime = SDL_GetTicks();
+	if(perfData.framesSinceFrametimeUpdate >= perfData.framesPerUpdate){
+		std::string newWindowTitle = GAME_NAME" - Frametime (ms): " + std::to_string((f32)perfData.frameTimeSum / (f32)perfData.framesPerUpdate);
+		SDL_SetWindowTitle(g_Window, newWindowTitle.c_str());
+		perfData.framesSinceFrametimeUpdate = 0;
+		perfData.frameTimeSum = 0;
+	}
+	perfData.frameTimeSum += (perfData.currentTime - perfData.lastTime);
+	perfData.lastTime = perfData.currentTime;
+	perfData.framesSinceFrametimeUpdate++;
 }
 
 void Quit(){
