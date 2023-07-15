@@ -3,5 +3,5 @@
 out vec4 outputColor;
 
 void main(){
-	outputColor = vec4(0.3f, 0.4f, 0.7f, 1.0f);
+	outputColor = vec4(1.0f, 0.35f, 0.79f, 1.0f);
 }

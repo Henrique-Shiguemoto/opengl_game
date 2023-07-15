@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 SDL_Window* g_Window;
 SDL_GLContext g_OpenGLContext;
@@ -19,14 +20,46 @@ PerformanceData g_PerData;
 
 i32 main(){
 	if(!Init()) return 1;
-
+	
 	Shader shader("shaders/shader.vs", "shaders/shader.fs");
+
+	f32 vertices[] = {
+		 0.5f, 0.5f, 1.0f,
+		-0.5f, 0.5f, 1.0f,
+		 0.5f, -0.5f, 1.0f,
+		-0.5f, -0.5f, 1.0f,
+	};
+
+	u32 indices[] = {
+		0, 1, 2,
+		1, 2, 3
+	};
+
+	VertexArray vao;
+	vao.Bind();
+	VertexBuffer vbo(vertices, sizeof(vertices));
+	IndexBuffer ibo(indices, sizeof(indices));
+	vao.DefineVBOLayout(vbo, 0, 3, 12, 0);
 
 	while(g_GameIsRunning){
 		HandleInput();
 		SimulateWorld();
-		RenderGraphics();
+
+		glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		shader.Use();
+		vao.Bind();
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		SDL_GL_SwapWindow(g_Window);
 	}
+
+	shader.Delete();
+	vbo.Delete();
+	ibo.Delete();
+	vao.Delete();
+
 	Quit();
 }
 
@@ -103,9 +136,15 @@ void SimulateWorld(){
 }
 
 void RenderGraphics(){
-	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapWindow(g_Window);
+	// glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
+	// glClear(GL_COLOR_BUFFER_BIT);
+
+	// shader.Use();
+	// vao.Bind();
+
+	// glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	// SDL_GL_SwapWindow(g_Window);
 }
 
 void UpdateFrametimeInWindowTitle(PerformanceData& perfData){

@@ -14,6 +14,7 @@
 class Shader{
 public:
 	u32 id;
+	Shader() = default;
 	Shader(const char* vertexShaderFilepath, const char* fragmentShaderFilepath);
 	void Use();
 	void Delete();
