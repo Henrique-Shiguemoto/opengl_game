@@ -8,17 +8,20 @@
 #include "SDL2/SDL.h"
 #include "main.h"
 
+#include "Shader.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+
 SDL_Window* g_Window;
 SDL_GLContext g_OpenGLContext;
 b8 g_GameIsRunning = true;
 PerformanceData g_PerData;
 
-f32 r = 0.0f;
-f32 g = 0.0f;
-f32 b = 0.0f;
-
 i32 main(){
 	if(!Init()) return 1;
+
+	Shader shader("shaders/shader.vs", "shaders/shader.fs");
+
 	while(g_GameIsRunning){
 		HandleInput();
 		SimulateWorld();
@@ -28,6 +31,10 @@ i32 main(){
 }
 
 b8 Init(){
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
 		std::cout << "SDL2 Couldn't Initialize!\n" << std::endl;
 		return false;
@@ -65,20 +72,16 @@ b8 Init(){
 		return false;
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
 	if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)){
 		std::cout << "Couldn't initialize GLAD and load OpenGL function pointers!\n" << std::endl;
 		return false;
 	}
-	
-	SDL_GL_SetSwapInterval(1); //enable vsync
 
 	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
 	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 	std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+
+	SDL_GL_SetSwapInterval(1); //enable vsync
 
 	return true;
 }
@@ -87,30 +90,11 @@ void HandleInput(){
 	UpdateFrametimeInWindowTitle(g_PerData);
 
 	SDL_Event e;
-	f32 colorIncrement = 0.01f;
 	while(SDL_PollEvent(&e)){
 		const u8* keyboardState = SDL_GetKeyboardState(NULL);
 
 		if(e.type == SDL_QUIT || keyboardState[SDL_SCANCODE_ESCAPE]){
 			g_GameIsRunning = false;
-		}
-		if(keyboardState[SDL_SCANCODE_A]){
-			r += colorIncrement;
-			if(r >= 1.0f){
-				r = 0.0f;
-			}
-		}
-		if(keyboardState[SDL_SCANCODE_S]){
-			g += colorIncrement;
-			if(g >= 1.0f){
-				g = 0.0f;
-			}
-		}
-		if(keyboardState[SDL_SCANCODE_D]){
-			b += colorIncrement;
-			if(b >= 1.0f){
-				b = 0.0f;
-			}
 		}
 	}
 }
@@ -119,7 +103,7 @@ void SimulateWorld(){
 }
 
 void RenderGraphics(){
-	glClearColor(r, g, b, 1.0f);
+	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	SDL_GL_SwapWindow(g_Window);
 }
@@ -138,6 +122,7 @@ void UpdateFrametimeInWindowTitle(PerformanceData& perfData){
 }
 
 void Quit(){
+	SDL_GL_DeleteContext(g_OpenGLContext);
 	SDL_DestroyWindow(g_Window);
 	SDL_Quit();
 }
