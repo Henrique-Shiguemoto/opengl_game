@@ -1,7 +1,8 @@
 #version 330 core
 
 out vec4 outputColor;
+in vec3 colorFromVertexShader;
 
 void main(){
-	outputColor = vec4(1.0f, 0.35f, 0.79f, 1.0f);
+	outputColor = vec4(colorFromVertexShader, 1.0f);
 }
