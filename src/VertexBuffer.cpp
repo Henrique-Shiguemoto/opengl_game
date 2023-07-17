@@ -6,10 +6,6 @@ VertexBuffer::VertexBuffer(f32* data, u32 sizeInBytes){
 	glBufferData(GL_ARRAY_BUFFER, sizeInBytes, data, GL_STATIC_DRAW);
 }
 
-void VertexBuffer::SetupVertexBuffer(f32* data, u32 sizeInBytes){
-	
-}
-
 void VertexBuffer::Bind(){
 	glBindBuffer(GL_ARRAY_BUFFER, id);
 }

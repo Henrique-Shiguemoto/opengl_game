@@ -1,6 +1,6 @@
 #include "Game.h"
 
-// #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vertexShaderFilepath, const char* fragmentShaderFilepath, const char* windowIconFilepath){
@@ -60,7 +60,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
-	this->shader->SetupShader(vertexShaderFilepath, fragmentShaderFilepath);
+	this->shader = new Shader(vertexShaderFilepath, fragmentShaderFilepath);
 
 	f32 vertices[] = {
 		 0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f,
@@ -74,14 +74,12 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 		1, 2, 3
 	};
 
+	this->vao = new VertexArray();
 	this->vao->Bind();
-
-	this->vbo->SetupVertexBuffer(vertices, sizeof(vertices));
-	this->ibo->SetupIndexBuffer(indices, sizeof(indices));
-
+	this->vbo = new VertexBuffer(vertices, sizeof(vertices));
+	this->ibo = new IndexBuffer(indices, sizeof(indices));
 	this->vao->DefineVBOLayout(vbo, 0, 3, 24, 0);
 	this->vao->DefineVBOLayout(vbo, 1, 3, 24, 3);
-
 	this->isValid = true;
 	this->isRunning = true;
 	this->isFullscreen = false;

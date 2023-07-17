@@ -3,10 +3,7 @@
 Shader::Shader(const char* vertexShaderFilepath, const char* fragmentShaderFilepath){
 	this->vertexShaderFilepath = vertexShaderFilepath;
 	this->fragmentShaderFilepath = fragmentShaderFilepath;
-	this->SetupShader(vertexShaderFilepath, fragmentShaderFilepath);
-}
 
-void Shader::SetupShader(const char* vertexShaderFilepath, const char* fragmentShaderFilepath){
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
 	
