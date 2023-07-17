@@ -2,5 +2,13 @@
 
 i32 main(){
 	Game game("OpenGL Game", 800, 600, "shaders/shader.vs", "shaders/shader.fs", "assets/spaceship.png");
+	if(!game.isValid) return 1;
+
+	while(game.isRunning){
+		game.HandleInput();
+		game.SimulateWorld();
+		game.RenderGraphics();
+	}
+
 	game.Quit();
 }
