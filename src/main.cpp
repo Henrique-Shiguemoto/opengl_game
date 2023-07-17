@@ -18,10 +18,6 @@ SDL_GLContext g_OpenGLContext;
 b8 g_GameIsRunning = true;
 PerformanceData g_PerData;
 
-f32 x = 0.0f;
-f32 y = 0.0f;
-f32 z = 0.0f;
-
 i32 main(){
 	if(!Init()) return 1;
 	
@@ -43,8 +39,8 @@ i32 main(){
 	vao.Bind();
 	VertexBuffer vbo(vertices, sizeof(vertices));
 	IndexBuffer ibo(indices, sizeof(indices));
-	vao.DefineVBOLayout(vbo, 0, 3, 24, 0);
-	vao.DefineVBOLayout(vbo, 1, 3, 24, 3);
+	vao.DefineVBOLayout(&vbo, 0, 3, 24, 0);
+	vao.DefineVBOLayout(&vbo, 1, 3, 24, 3);
 
 	while(g_GameIsRunning){
 		HandleInput();
@@ -55,8 +51,6 @@ i32 main(){
 
 		shader.Use();
 		vao.Bind();
-
-		shader.SetVec3("pos", glm::vec3(x, y, z));
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		SDL_GL_SwapWindow(g_Window);
@@ -135,18 +129,6 @@ void HandleInput(){
 
 		if(e.type == SDL_QUIT || keyboardState[SDL_SCANCODE_ESCAPE]){
 			g_GameIsRunning = false;
-		}
-		if(keyboardState[SDL_SCANCODE_W]){
-			y += 0.005f;
-		}
-		if(keyboardState[SDL_SCANCODE_S]){
-			y -= 0.005f;
-		}
-		if(keyboardState[SDL_SCANCODE_A]){
-			x -= 0.005f;
-		}
-		if(keyboardState[SDL_SCANCODE_D]){
-			x += 0.005f;
 		}
 	}
 }

@@ -1,6 +1,12 @@
 #include "Shader.h"
 
 Shader::Shader(const char* vertexShaderFilepath, const char* fragmentShaderFilepath){
+	this->vertexShaderFilepath = vertexShaderFilepath;
+	this->fragmentShaderFilepath = fragmentShaderFilepath;
+	this->SetupShader(vertexShaderFilepath, fragmentShaderFilepath);
+}
+
+void Shader::SetupShader(const char* vertexShaderFilepath, const char* fragmentShaderFilepath){
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
 	
@@ -19,7 +25,7 @@ Shader::Shader(const char* vertexShaderFilepath, const char* fragmentShaderFilep
 	
 	const char* vertexShaderSourceCode = vertexCode.c_str();
 	const char* fragmentShaderSourceCode = fragmentCode.c_str();
-	
+
 	u32 vertexShaderID, fragmentShaderID;
 	i32 success;
 	i8 infoLog[512];

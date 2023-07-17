@@ -14,8 +14,11 @@
 class Shader{
 public:
 	u32 id;
+	std::string vertexShaderFilepath;
+	std::string fragmentShaderFilepath;
 	Shader() = default;
 	Shader(const char* vertexShaderFilepath, const char* fragmentShaderFilepath);
+	void SetupShader(const char* vertexShaderFilepath, const char* fragmentShaderFilepath);
 	void Use();
 	void Delete();
 	void SetBool(const std::string& name, bool value) const;
