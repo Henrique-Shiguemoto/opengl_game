@@ -12,15 +12,17 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-	if(SDL_Init(SDL_INIT_VIDEO) < 0){
+	if(SDL_Init(SDL_INIT_VIDEO)){
 		std::cout << "SDL2 Couldn't Initialize!\n" << std::endl;
 		this->isValid = false;
+		return;
 	}
 
 	this->window = SDL_CreateWindow(this->name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
 	if(!this->window){
 		std::cout << "Couldn't create the window!\n" << std::endl;
 		this->isValid = false;
+		return;
 	}
 
 	i32 iconWidth, iconHeight, iconChannelCount;
@@ -28,6 +30,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	if(!iconPixels){
 		std::cout << "Couldn't load icon image" << std::endl;
 		this->isValid = false;
+		return;
 	}
 
 	SDL_Surface* iconSurface = SDL_CreateRGBSurfaceFrom(iconPixels,
@@ -47,31 +50,29 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	if(!this->context){
 		std::cout << "Couldn't create OpenGL context!\n" << std::endl;
 		this->isValid = false;
+		return;
 	}
 
 	if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)){
 		std::cout << "Couldn't initialize GLAD and load OpenGL function pointers!\n" << std::endl;
 		this->isValid = false;
+		return;
 	}
-
-	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-	std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
 
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
 	this->shader = new Shader(vertexShaderFilepath, fragmentShaderFilepath);
 
 	f32 vertices[] = {
-		 0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f
+		this->playerPosition_f[0], this->playerPosition_f[1],   1.0f, 1.0f, 0.0f, 0.0f,
+		 0.1f, 							-0.1f, 					1.0f, 0.0f, 0.0f, 1.0f,
+		 0.1f,  						 0.1f, 					1.0f, 0.0f, 1.0f, 0.0f,
+		-0.1f,  						 0.1f, 					1.0f, 1.0f, 0.0f, 0.0f
 	};
 
 	u32 indices[] = {
 		0, 1, 2,
-		1, 2, 3
+		0, 2, 3
 	};
 
 	this->vao = new VertexArray();
@@ -87,7 +88,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 }
 
 void Game::HandleInput(){
-	UpdateFrametimeInWindowTitle();
+	this->UpdateFrametimeInWindowTitle();
 
 	SDL_Event e;
 	while(SDL_PollEvent(&e)){
@@ -96,20 +97,50 @@ void Game::HandleInput(){
 		if(e.type == SDL_QUIT || keyboardState[SDL_SCANCODE_ESCAPE]){
 			this->isRunning = false;
 		}
+
+		if(e.type == SDL_MOUSEBUTTONDOWN){
+			if(e.button.button == SDL_BUTTON_RIGHT){
+				SDL_GetMouseState(&this->lastMouseClickPosition[0], &this->lastMouseClickPosition[1]);
+				this->playerStartedMoving = true;
+				this->playerIsMoving = true;
+				this->lastMouseClickPositionNormalized[0] =  (this->lastMouseClickPosition[0] - this->windowWidth * 0.5f) / (this->windowWidth * 0.5f);
+				this->lastMouseClickPositionNormalized[1] = -(this->lastMouseClickPosition[1] - this->windowHeight * 0.5f) / (this->windowHeight * 0.5f);
+			}
+		}
 	}
 }
 
 void Game::SimulateWorld(){
-
+	if(this->playerStartedMoving){
+		//calculate velocity vector only once
+		this->playerVelocity_f[0] = this->playerPosition_f[0] - this->lastMouseClickPositionNormalized[0];
+		this->playerVelocity_f[1] = this->playerPosition_f[1] - this->lastMouseClickPositionNormalized[1];
+		this->playerVelocity_f = glm::normalize(this->playerVelocity_f);
+		this->playerStartedMoving = false;
+	}
+	if(this->playerIsMoving){
+		f32 mousePlayerDiffX_abs = glm::abs(this->playerPosition_f.x - this->lastMouseClickPositionNormalized[0]);
+		f32 mousePlayerDiffY_abs = glm::abs(this->playerPosition_f.y - this->lastMouseClickPositionNormalized[1]);
+		if(mousePlayerDiffX_abs < distanceForPlayerToStopMoving && mousePlayerDiffY_abs < distanceForPlayerToStopMoving){
+			this->playerIsMoving = false;
+			this->playerVelocity_f = glm::vec3(0.0f);
+		}
+	}
+	
+	// updating player's position
+	this->playerPosition_f[0] -= this->playerVelocity_f[0] * this->playerMaximumSpeed;
+	this->playerPosition_f[1] -= this->playerVelocity_f[1] * this->playerMaximumSpeed;
 }
 
 void Game::RenderGraphics(){
 	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
+
 	this->shader->Use();
 	this->vao->Bind();
-	
+
+	this->shader->SetVec3("playerPos", this->playerPosition_f);
+
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	SDL_GL_SwapWindow(this->window);
 }
@@ -135,4 +166,16 @@ void Game::Quit(){
 	SDL_GL_DeleteContext(this->context);
 	SDL_DestroyWindow(this->window);
 	SDL_Quit();
+}
+
+void Game::PrintMouseClickPosition(){
+	std::cout << "Mouse Click Position: (" << this->lastMouseClickPosition[0] << ", " << this->lastMouseClickPosition[1] << ")" << std::endl;
+}
+
+void Game::PrintPlayerPosition(){
+	std::cout << "Player's Position: (" << this->playerPosition_f[0] << ", " << this->playerPosition_f[1] << ")" << std::endl;
+}
+
+void Game::PrintPlayerVelocity(){
+	std::cout << "Player's Velocity: (" << this->playerVelocity_f[0] << ", " << this->playerVelocity_f[1] << ")" << std::endl;
 }

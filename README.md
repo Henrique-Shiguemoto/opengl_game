@@ -9,7 +9,7 @@ Open command prompt and enter this command: <code>make run</code>
 # Technologies Used
 
 - C++ 				(Programming Linguage)
-- OpenGL 			(Glad)
+- OpenGL 3.3		(Glad)
 - SDL2	 			(For windowing, input, audio)
 - stb_image.h 		(For image/texture/icon loading)
 - GLM				(Math Library)
