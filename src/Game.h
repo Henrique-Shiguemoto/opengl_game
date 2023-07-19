@@ -50,8 +50,10 @@ public:
 	f32 lastMouseClickPositionNormalized[2] 	= {0.0f, 0.0f};
 
 	// (X, Y, Z) (in [-1.0, 1.0f] range)
-	glm::vec3 playerPosition_f 					= glm::vec3(-0.1f, -0.1f, 0.0f);
+	glm::vec3 playerPosition_f 					= glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 playerVelocity_f 					= glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 playerDimension_f 				= glm::vec3(0.2f, 0.2f, 0.0f);
+	
 	f32 playerMaximumSpeed 						= 0.005f;
 	b8 playerStartedMoving 						= false;
 	b8 playerIsMoving 							= false;
@@ -59,6 +61,7 @@ public:
 
 private:
 	void PrintMouseClickPosition();
+	void PrintMouseClickPositionNormalized();
 	void PrintPlayerPosition();
 	void PrintPlayerVelocity();
 };

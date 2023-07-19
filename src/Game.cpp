@@ -64,10 +64,10 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	this->shader = new Shader(vertexShaderFilepath, fragmentShaderFilepath);
 
 	f32 vertices[] = {
-		this->playerPosition_f[0], this->playerPosition_f[1],   1.0f, 1.0f, 0.0f, 0.0f,
-		 0.1f, 							-0.1f, 					1.0f, 0.0f, 0.0f, 1.0f,
-		 0.1f,  						 0.1f, 					1.0f, 0.0f, 1.0f, 0.0f,
-		-0.1f,  						 0.1f, 					1.0f, 1.0f, 0.0f, 0.0f
+		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 1.0f, 1.0f, 0.0f, 0.0f,
+		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 1.0f, 0.0f, 0.0f, 1.0f,
+		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 1.0f, 0.0f, 1.0f, 0.0f,
+		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 1.0f, 1.0f, 0.0f,	0.0f
 	};
 
 	u32 indices[] = {
@@ -137,8 +137,12 @@ void Game::RenderGraphics(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glm::mat4 transform = glm::mat4(1.0f);
-	transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+	transform = glm::translate(transform, glm::vec3(this->playerPosition_f[0], this->playerPosition_f[1], 0.0f));
+
+	f32 scaleMuch = glm::abs(glm::sin(0.001f*(f32)SDL_GetTicks())) + 0.25f;
+	transform = glm::scale(transform, glm::vec3(scaleMuch, scaleMuch, 1.0f));
 	transform = glm::rotate(transform, 0.001f * (f32)SDL_GetTicks(), glm::vec3(0.0f, 0.0f, 1.0f));
+
 
 	this->shader->Use();
 	this->vao->Bind();
@@ -174,6 +178,10 @@ void Game::Quit(){
 
 void Game::PrintMouseClickPosition(){
 	std::cout << "Mouse Click Position: (" << this->lastMouseClickPosition[0] << ", " << this->lastMouseClickPosition[1] << ")" << std::endl;
+}
+
+void Game::PrintMouseClickPositionNormalized(){
+	std::cout << "Mouse Click Position: (" << this->lastMouseClickPositionNormalized[0] << ", " << this->lastMouseClickPositionNormalized[1] << ")" << std::endl;
 }
 
 void Game::PrintPlayerPosition(){
