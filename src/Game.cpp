@@ -136,10 +136,14 @@ void Game::RenderGraphics(){
 	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	glm::mat4 transform = glm::mat4(1.0f);
+	transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+	transform = glm::rotate(transform, 0.001f * (f32)SDL_GetTicks(), glm::vec3(0.0f, 0.0f, 1.0f));
+
 	this->shader->Use();
 	this->vao->Bind();
 
-	this->shader->SetVec3("playerPos", this->playerPosition_f);
+	this->shader->SetMat4("transform", transform);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	SDL_GL_SwapWindow(this->window);
