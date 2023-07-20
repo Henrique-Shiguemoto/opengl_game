@@ -63,24 +63,85 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	
 	this->shader = new Shader(vertexShaderFilepath, fragmentShaderFilepath);
 
-	f32 vertices[] = {
-		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 1.0f, 1.0f, 0.0f, 0.0f,
-		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 1.0f, 0.0f, 0.0f, 1.0f,
-		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 1.0f, 0.0f, 1.0f, 0.0f,
-		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 1.0f, 1.0f, 0.0f,	0.0f
+	f32 mapVertices[] = {
+		//left face
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
+		
+		//far face
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
+		
+		// right face
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
+		
+		//near face
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
+		
+		//top face
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
+		
+		//bottom face
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f  //right-bottom-far
 	};
 
-	u32 indices[] = {
+	// u32 mapIndices[] = {
+	//	
+	// };
+
+	f32 playerVertices[] = {
+		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 0.0f, 1.0f, 0.0f, 0.0f,
+		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 0.0f, 0.0f, 0.0f, 1.0f,
+		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 0.0f, 0.0f, 1.0f, 0.0f,
+		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 0.0f, 1.0f, 0.0f,	0.0f
+	};
+
+	u32 playerIndices[] = {
 		0, 1, 2,
 		0, 2, 3
 	};
 
-	this->vao = new VertexArray();
-	this->vao->Bind();
-	this->vbo = new VertexBuffer(vertices, sizeof(vertices));
-	this->ibo = new IndexBuffer(indices, sizeof(indices));
-	this->vao->DefineVBOLayout(vbo, 0, 3, 24, 0);
-	this->vao->DefineVBOLayout(vbo, 1, 3, 24, 3);
+	this->vaoPlayer = new VertexArray();
+	this->vaoPlayer->Bind();
+	this->vboPlayer = new VertexBuffer(playerVertices, sizeof(playerVertices));
+	this->iboPlayer = new IndexBuffer(playerIndices, sizeof(playerIndices));
+	this->vaoPlayer->DefineVBOLayout(vboPlayer, 0, 3, 24, 0);
+	this->vaoPlayer->DefineVBOLayout(vboPlayer, 1, 3, 24, 3);
+	
+	this->vaoMap = new VertexArray();
+	this->vaoMap->Bind();
+	this->vboMap = new VertexBuffer(mapVertices, sizeof(mapVertices));
+	this->vaoMap->DefineVBOLayout(vboMap, 0, 3, 24, 0);
+	this->vaoMap->DefineVBOLayout(vboMap, 1, 3, 24, 3);
+
 	this->isValid = true;
 	this->isRunning = true;
 	this->isFullscreen = false;
@@ -100,11 +161,11 @@ void Game::HandleInput(){
 
 		if(e.type == SDL_MOUSEBUTTONDOWN){
 			if(e.button.button == SDL_BUTTON_RIGHT){
-				SDL_GetMouseState(&this->lastMouseClickPosition[0], &this->lastMouseClickPosition[1]);
+				SDL_GetMouseState(&this->lastMouseClickPosition.x, &this->lastMouseClickPosition.y);
 				this->playerStartedMoving = true;
 				this->playerIsMoving = true;
-				this->lastMouseClickPositionNormalized[0] =  (this->lastMouseClickPosition[0] - this->windowWidth * 0.5f) / (this->windowWidth * 0.5f);
-				this->lastMouseClickPositionNormalized[1] = -(this->lastMouseClickPosition[1] - this->windowHeight * 0.5f) / (this->windowHeight * 0.5f);
+				this->lastMouseClickPositionNormalized.x =  (this->lastMouseClickPosition.x - this->windowWidth * 0.5f) / (this->windowWidth * 0.5f);
+				this->lastMouseClickPositionNormalized.y = -(this->lastMouseClickPosition.y - this->windowHeight * 0.5f) / (this->windowHeight * 0.5f);
 			}
 		}
 	}
@@ -113,14 +174,14 @@ void Game::HandleInput(){
 void Game::SimulateWorld(){
 	if(this->playerStartedMoving){
 		//calculate velocity vector only once
-		this->playerVelocity_f[0] = this->playerPosition_f[0] - this->lastMouseClickPositionNormalized[0];
-		this->playerVelocity_f[1] = this->playerPosition_f[1] - this->lastMouseClickPositionNormalized[1];
+		this->playerVelocity_f.x = this->playerPosition_f.x - this->lastMouseClickPositionNormalized.x;
+		this->playerVelocity_f.y = this->playerPosition_f.y - this->lastMouseClickPositionNormalized.y;
 		this->playerVelocity_f = glm::normalize(this->playerVelocity_f);
 		this->playerStartedMoving = false;
 	}
 	if(this->playerIsMoving){
-		f32 mousePlayerDiffX_abs = glm::abs(this->playerPosition_f.x - this->lastMouseClickPositionNormalized[0]);
-		f32 mousePlayerDiffY_abs = glm::abs(this->playerPosition_f.y - this->lastMouseClickPositionNormalized[1]);
+		f32 mousePlayerDiffX_abs = glm::abs(this->playerPosition_f.x - this->lastMouseClickPositionNormalized.x);
+		f32 mousePlayerDiffY_abs = glm::abs(this->playerPosition_f.y - this->lastMouseClickPositionNormalized.y);
 		if(mousePlayerDiffX_abs < distanceForPlayerToStopMoving && mousePlayerDiffY_abs < distanceForPlayerToStopMoving){
 			this->playerIsMoving = false;
 			this->playerVelocity_f = glm::vec3(0.0f);
@@ -128,28 +189,39 @@ void Game::SimulateWorld(){
 	}
 	
 	// updating player's position
-	this->playerPosition_f[0] -= this->playerVelocity_f[0] * this->playerMaximumSpeed;
-	this->playerPosition_f[1] -= this->playerVelocity_f[1] * this->playerMaximumSpeed;
+	this->playerPosition_f.x -= this->playerVelocity_f.x * this->playerMaximumSpeed;
+	this->playerPosition_f.y -= this->playerVelocity_f.y * this->playerMaximumSpeed;
 }
 
 void Game::RenderGraphics(){
 	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glm::mat4 transform = glm::mat4(1.0f);
-	transform = glm::translate(transform, glm::vec3(this->playerPosition_f[0], this->playerPosition_f[1], 0.0f));
+	// Position/Scale/Rotate the objects in their place
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(this->playerPosition_f.x, this->playerPosition_f.y, 0.0f));
+	// modelMatrix = glm::rotate(modelMatrix, 0.001f * (f32)SDL_GetTicks(), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	f32 scaleMuch = glm::abs(glm::sin(0.001f*(f32)SDL_GetTicks())) + 0.25f;
-	transform = glm::scale(transform, glm::vec3(scaleMuch, scaleMuch, 1.0f));
-	transform = glm::rotate(transform, 0.001f * (f32)SDL_GetTicks(), glm::vec3(0.0f, 0.0f, 1.0f));
+	// Camera position (nothing for now)
+	glm::mat4 viewMatrix = glm::mat4(1.0f);
+	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, -15.0f, -60.0f));
 
+	// Perspective projection matrix config
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(this->fovDegrees), this->windowAspectRatio, this->nearClipDistance, this->farClipDistance);
 
 	this->shader->Use();
-	this->vao->Bind();
+	this->shader->SetMat4("modelMatrix", modelMatrix);
+	this->shader->SetMat4("viewMatrix", viewMatrix);
+	this->shader->SetMat4("projectionMatrix", projectionMatrix);
 
-	this->shader->SetMat4("transform", transform);
-
+	//drawing player
+	this->vaoPlayer->Bind();
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	//drawing map
+	this->vaoMap->Bind();
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
 	SDL_GL_SwapWindow(this->window);
 }
 
@@ -168,24 +240,24 @@ void Game::UpdateFrametimeInWindowTitle(){
 
 void Game::Quit(){
 	shader->Delete();
-	vbo->Delete();
-	ibo->Delete();
-	vao->Delete();
+	vboPlayer->Delete();
+	iboPlayer->Delete();
+	vaoPlayer->Delete();
 	SDL_GL_DeleteContext(this->context);
 	SDL_DestroyWindow(this->window);
 	SDL_Quit();
 }
 
 void Game::PrintMouseClickPosition(){
-	std::cout << "Mouse Click Position: (" << this->lastMouseClickPosition[0] << ", " << this->lastMouseClickPosition[1] << ")" << std::endl;
+	std::cout << "Mouse Click Position: (" << this->lastMouseClickPosition.x << ", " << this->lastMouseClickPosition.y << ")" << std::endl;
 }
 
 void Game::PrintMouseClickPositionNormalized(){
-	std::cout << "Mouse Click Position: (" << this->lastMouseClickPositionNormalized[0] << ", " << this->lastMouseClickPositionNormalized[1] << ")" << std::endl;
+	std::cout << "Mouse Click Position: (" << this->lastMouseClickPositionNormalized.x << ", " << this->lastMouseClickPositionNormalized.y << ")" << std::endl;
 }
 
 void Game::PrintPlayerPosition(){
-	std::cout << "Player's Position: (" << this->playerPosition_f[0] << ", " << this->playerPosition_f[1] << ")" << std::endl;
+	std::cout << "Player's Position: (" << this->playerPosition_f.x << ", " << this->playerPosition_f.y << ")" << std::endl;
 }
 
 void Game::PrintPlayerVelocity(){
