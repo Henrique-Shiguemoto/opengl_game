@@ -59,63 +59,36 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 		return;
 	}
 
+	glEnable(GL_DEPTH_TEST);
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
 	this->shader = new Shader(vertexShaderFilepath, fragmentShaderFilepath);
 
 	f32 mapVertices[] = {
-		//left face
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
-		
-		//far face
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-far
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
-		
-		// right face
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
-		
-		//near face
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
-		
-		//top face
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-top-far
-		
-		//bottom face
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f, //left-bottom-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.8f, 0.0f  //right-bottom-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 1.0f, 1.0f, //left-bottom-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, 1.0f, //right-top-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, 0.0f, //right-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, 1.0f, //right-bottom-far
 	};
 
-	// u32 mapIndices[] = {
-	//	
-	// };
+	u32 mapIndices[] = {
+		0, 1, 2,
+		0, 2, 3,
+		2, 3, 7,
+		2, 7, 6,
+		7, 6, 5,
+		7, 5, 4,
+		0, 5, 4,
+		0, 1, 5,
+		1, 2, 5,
+		2, 5, 6,
+		0, 3, 4,
+		3, 4, 7
+	};
 
 	f32 playerVertices[] = {
 		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 0.0f, 1.0f, 0.0f, 0.0f,
@@ -139,6 +112,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	this->vaoMap = new VertexArray();
 	this->vaoMap->Bind();
 	this->vboMap = new VertexBuffer(mapVertices, sizeof(mapVertices));
+	this->iboMap = new IndexBuffer(mapIndices, sizeof(mapIndices));
 	this->vaoMap->DefineVBOLayout(vboMap, 0, 3, 24, 0);
 	this->vaoMap->DefineVBOLayout(vboMap, 1, 3, 24, 3);
 
@@ -195,16 +169,16 @@ void Game::SimulateWorld(){
 
 void Game::RenderGraphics(){
 	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Position/Scale/Rotate the objects in their place
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(this->playerPosition_f.x, this->playerPosition_f.y, 0.0f));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(-this->playerPosition_f.x, -this->playerPosition_f.y, 0.0f));
 	// modelMatrix = glm::rotate(modelMatrix, 0.001f * (f32)SDL_GetTicks(), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Camera position (nothing for now)
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
-	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, -15.0f, -60.0f));
+	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, -5.0f, -40.0f));
 
 	// Perspective projection matrix config
 	glm::mat4 projectionMatrix = glm::perspective(glm::radians(this->fovDegrees), this->windowAspectRatio, this->nearClipDistance, this->farClipDistance);
@@ -215,12 +189,12 @@ void Game::RenderGraphics(){
 	this->shader->SetMat4("projectionMatrix", projectionMatrix);
 
 	//drawing player
-	this->vaoPlayer->Bind();
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	// this->vaoPlayer->Bind();
+	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	//drawing map
 	this->vaoMap->Bind();
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	SDL_GL_SwapWindow(this->window);
 }

@@ -68,9 +68,9 @@ public:
 	glm::vec3 playerVelocity_f 						= glm::vec3(0.0f);
 
 	glm::vec3 mapPosition_f							= glm::vec3(0.0f);
-	glm::vec3 mapDimension_f						= glm::vec3(50.0f, 1.0f, 50.0f);
+	glm::vec3 mapDimension_f						= glm::vec3(25.0f, 1.0f, 25.0f);
 
-	f32 playerMaximumSpeed 							= 0.005f;
+	f32 playerMaximumSpeed 							= 0.05f;
 	b8 playerStartedMoving 							= false;
 	b8 playerIsMoving 								= false;
 	f32 distanceForPlayerToStopMoving 				= 0.005f;
