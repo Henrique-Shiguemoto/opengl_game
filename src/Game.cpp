@@ -25,6 +25,10 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 		return;
 	}
 
+	SDL_ShowCursor(SDL_DISABLE);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_WarpMouseInWindow(this->window, this->windowWidth / 2, this->windowHeight / 2); // fix the mouse in the middle of the screen always
+
 	i32 iconWidth, iconHeight, iconChannelCount;
 	u8* iconPixels = stbi_load(windowIconFilepath, &iconWidth, &iconHeight, &iconChannelCount, 0);
 	if(!iconPixels){
@@ -72,7 +76,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, 0.0f, //right-bottom-near
 		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, 1.0f, //right-top-near
 		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, 0.0f, //right-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, 1.0f, //right-bottom-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, 1.0f //right-bottom-far
 	};
 
 	u32 mapIndices[] = {
@@ -91,15 +95,29 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	};
 
 	f32 playerVertices[] = {
-		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 0.0f, 1.0f, 0.0f, 0.0f,
-		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y - 0.5f*this->playerDimension_f.y), 0.0f, 0.0f, 0.0f, 1.0f,
-		(this->playerPosition_f.x + 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 0.0f, 0.0f, 1.0f, 0.0f,
-		(this->playerPosition_f.x - 0.5f*this->playerDimension_f.x), (this->playerPosition_f.y + 0.5f*this->playerDimension_f.y), 0.0f, 1.0f, 0.0f,	0.0f
+		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
+		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
+		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
+		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 1.0f, //left-bottom-far
+		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 0.0f, //right-bottom-near
+		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 1.0f, //right-top-near
+		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 0.0f, //right-top-far
+		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 1.0f //right-bottom-far
 	};
 
 	u32 playerIndices[] = {
 		0, 1, 2,
-		0, 2, 3
+		0, 2, 3,
+		2, 3, 7,
+		2, 7, 6,
+		7, 6, 5,
+		7, 5, 4,
+		0, 5, 4,
+		0, 1, 5,
+		1, 2, 5,
+		2, 5, 6,
+		0, 3, 4,
+		3, 4, 7
 	};
 
 	this->vaoPlayer = new VertexArray();
@@ -123,16 +141,19 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 }
 
 void Game::HandleInput(){
-	this->UpdateFrametimeInWindowTitle();
+	this->UpdatePerformanceData();
 
 	SDL_Event e;
 	while(SDL_PollEvent(&e)){
-		const u8* keyboardState = SDL_GetKeyboardState(NULL);
+		// keyboard stuff
+		const u8* keyboardState 		= SDL_GetKeyboardState(NULL);
+		this->isRunning 				= !keyboardState[SDL_SCANCODE_ESCAPE];
+		this->cameraHasToMoveFront 		= keyboardState[SDL_SCANCODE_W];
+		this->cameraHasToMoveBack 		= keyboardState[SDL_SCANCODE_S];
+		this->cameraHasToMoveLeft 		= keyboardState[SDL_SCANCODE_A];
+		this->cameraHasToMoveRight 		= keyboardState[SDL_SCANCODE_D];
 
-		if(e.type == SDL_QUIT || keyboardState[SDL_SCANCODE_ESCAPE]){
-			this->isRunning = false;
-		}
-
+		// mouse
 		if(e.type == SDL_MOUSEBUTTONDOWN){
 			if(e.button.button == SDL_BUTTON_RIGHT){
 				SDL_GetMouseState(&this->lastMouseClickPosition.x, &this->lastMouseClickPosition.y);
@@ -142,29 +163,45 @@ void Game::HandleInput(){
 				this->lastMouseClickPositionNormalized.y = -(this->lastMouseClickPosition.y - this->windowHeight * 0.5f) / (this->windowHeight * 0.5f);
 			}
 		}
+		if(e.type == SDL_MOUSEMOTION){
+			if(this->firstMouseInput){
+				SDL_GetMouseState(&this->lastMousePosition.x, &this->lastMousePosition.y);
+				this->firstMouseInput = false;
+			}
+
+			SDL_GetMouseState(&this->mousePosition.x, &this->mousePosition.y);
+			f32 xMousePosOffset = this->mousePosition.x - this->lastMousePosition.x;
+			f32 yMousePosOffset = -(this->mousePosition.y - this->lastMousePosition.y);
+
+			this->lastMousePosition.x = this->mousePosition.x;
+			this->lastMousePosition.y = this->mousePosition.y;
+
+			this->cameraYaw += xMousePosOffset * this->mouseSensitivity;
+			this->cameraPitch += yMousePosOffset * this->mouseSensitivity;
+
+			if(this->cameraPitch > 89.0f) this->cameraPitch = 89.0f;
+			if(this->cameraPitch < -89.0f) this->cameraPitch = -89.0f;
+
+			glm::vec3 direction;
+			direction.x = glm::cos(glm::radians(this->cameraYaw)) * glm::cos(glm::radians(this->cameraPitch));
+			direction.y = glm::sin(glm::radians(this->cameraPitch));
+			direction.z = glm::sin(glm::radians(this->cameraYaw)) * glm::cos(glm::radians(this->cameraPitch));
+			this->cameraFront_f = glm::normalize(direction);
+		}
+		if(e.type == SDL_MOUSEWHEEL){
+			fovDegrees -= (f32)e.wheel.y;
+			if(fovDegrees < 1.0f) fovDegrees = 1.0f;
+			if(fovDegrees > 45.0f) fovDegrees = 45.0f;
+		}
+		if(e.type == SDL_QUIT) this->isRunning = false;
 	}
 }
 
 void Game::SimulateWorld(){
-	if(this->playerStartedMoving){
-		//calculate velocity vector only once
-		this->playerVelocity_f.x = this->playerPosition_f.x - this->lastMouseClickPositionNormalized.x;
-		this->playerVelocity_f.y = this->playerPosition_f.y - this->lastMouseClickPositionNormalized.y;
-		this->playerVelocity_f = glm::normalize(this->playerVelocity_f);
-		this->playerStartedMoving = false;
-	}
-	if(this->playerIsMoving){
-		f32 mousePlayerDiffX_abs = glm::abs(this->playerPosition_f.x - this->lastMouseClickPositionNormalized.x);
-		f32 mousePlayerDiffY_abs = glm::abs(this->playerPosition_f.y - this->lastMouseClickPositionNormalized.y);
-		if(mousePlayerDiffX_abs < distanceForPlayerToStopMoving && mousePlayerDiffY_abs < distanceForPlayerToStopMoving){
-			this->playerIsMoving = false;
-			this->playerVelocity_f = glm::vec3(0.0f);
-		}
-	}
-	
-	// updating player's position
-	this->playerPosition_f.x -= this->playerVelocity_f.x * this->playerMaximumSpeed;
-	this->playerPosition_f.y -= this->playerVelocity_f.y * this->playerMaximumSpeed;
+	if(this->cameraHasToMoveFront) this->cameraPosition_f += this->cameraFront_f * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->cameraHasToMoveBack)  this->cameraPosition_f -= this->cameraFront_f * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->cameraHasToMoveLeft)  this->cameraPosition_f -= glm::normalize(glm::cross(this->cameraFront_f, this->cameraUp_f)) * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->cameraHasToMoveRight) this->cameraPosition_f += glm::normalize(glm::cross(this->cameraFront_f, this->cameraUp_f)) * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
 }
 
 void Game::RenderGraphics(){
@@ -173,12 +210,9 @@ void Game::RenderGraphics(){
 
 	// Position/Scale/Rotate the objects in their place
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(-this->playerPosition_f.x, -this->playerPosition_f.y, 0.0f));
-	// modelMatrix = glm::rotate(modelMatrix, 0.001f * (f32)SDL_GetTicks(), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Camera position (nothing for now)
-	glm::mat4 viewMatrix = glm::mat4(1.0f);
-	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, -5.0f, -40.0f));
+	glm::mat4 viewMatrix = glm::lookAt(this->cameraPosition_f, this->cameraPosition_f + this->cameraFront_f, this->cameraUp_f);
 
 	// Perspective projection matrix config
 	glm::mat4 projectionMatrix = glm::perspective(glm::radians(this->fovDegrees), this->windowAspectRatio, this->nearClipDistance, this->farClipDistance);
@@ -189,8 +223,8 @@ void Game::RenderGraphics(){
 	this->shader->SetMat4("projectionMatrix", projectionMatrix);
 
 	//drawing player
-	// this->vaoPlayer->Bind();
-	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	this->vaoPlayer->Bind();
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	//drawing map
 	this->vaoMap->Bind();
@@ -199,17 +233,10 @@ void Game::RenderGraphics(){
 	SDL_GL_SwapWindow(this->window);
 }
 
-void Game::UpdateFrametimeInWindowTitle(){
-	performanceData.currentTime = SDL_GetTicks();
-	if(performanceData.framesSinceFrametimeUpdate >= performanceData.framesPerUpdate){
-		std::string newWindowTitle = this->name + " - Frametime (ms): " + std::to_string((f32)performanceData.frameTimeSum / (f32)performanceData.framesPerUpdate);
-		SDL_SetWindowTitle(this->window, newWindowTitle.c_str());
-		performanceData.framesSinceFrametimeUpdate = 0;
-		performanceData.frameTimeSum = 0;
-	}
-	performanceData.frameTimeSum += (performanceData.currentTime - performanceData.lastTime);
-	performanceData.lastTime = performanceData.currentTime;
-	performanceData.framesSinceFrametimeUpdate++;
+void Game::UpdatePerformanceData(){
+	performanceData.currentTimeInSeconds = SDL_GetTicks() / 1000.0f;
+	performanceData.deltaTimeInSeconds = performanceData.currentTimeInSeconds - performanceData.lastTimeInSeconds;
+	performanceData.lastTimeInSeconds = performanceData.currentTimeInSeconds;
 }
 
 void Game::Quit(){
@@ -236,4 +263,8 @@ void Game::PrintPlayerPosition(){
 
 void Game::PrintPlayerVelocity(){
 	std::cout << "Player's Velocity: (" << this->playerVelocity_f[0] << ", " << this->playerVelocity_f[1] << ")" << std::endl;
+}
+
+void Game::PrintDeltaTime(){
+	std::cout << "Delta Time: " << this->performanceData.deltaTimeInSeconds << std::endl;
 }

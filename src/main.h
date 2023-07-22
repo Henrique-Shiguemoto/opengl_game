@@ -19,11 +19,9 @@ typedef unsigned long long u64;
 #define ASPECT_RATIO 	((f32)WINDOW_WIDTH / (f32)WINDOW_HEIGHT)
 
 struct PerformanceData{
-	u32 currentTime 				= 0;
-	u32 lastTime 					= 0;
-	u32 framesSinceFrametimeUpdate 	= 0;
-	u32 framesPerUpdate 			= 60;
-	u32 frameTimeSum 				= 0;
+	f32 currentTimeInSeconds 		= 0;
+	f32 lastTimeInSeconds			= 0;
+	f32 deltaTimeInSeconds			= 0.0f;
 };
 
 b8 Init();
