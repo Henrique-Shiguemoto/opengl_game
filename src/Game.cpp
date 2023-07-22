@@ -165,21 +165,25 @@ void Game::HandleInput(){
 		}
 		if(e.type == SDL_MOUSEMOTION){
 			if(this->firstMouseInput){
-				SDL_GetMouseState(&this->lastMousePosition.x, &this->lastMousePosition.y);
+				this->mousePosition.x = e.motion.x;
+				this->mousePosition.y = e.motion.y;
 				this->firstMouseInput = false;
 			}
 
-			SDL_GetMouseState(&this->mousePosition.x, &this->mousePosition.y);
-			f32 xMousePosOffset = this->mousePosition.x - this->lastMousePosition.x;
-			f32 yMousePosOffset = -(this->mousePosition.y - this->lastMousePosition.y);
+			f32 xMousePosOffset = e.motion.xrel;
+			f32 yMousePosOffset = e.motion.yrel;
 
 			this->lastMousePosition.x = this->mousePosition.x;
 			this->lastMousePosition.y = this->mousePosition.y;
 
-			this->cameraYaw += xMousePosOffset * this->mouseSensitivity;
-			this->cameraPitch += yMousePosOffset * this->mouseSensitivity;
+			xMousePosOffset *= this->mouseSensitivity;
+			yMousePosOffset *= this->mouseSensitivity;
 
-			if(this->cameraPitch > 89.0f) this->cameraPitch = 89.0f;
+			this->cameraYaw   += xMousePosOffset;
+			this->cameraPitch -= yMousePosOffset;
+			std::cout << this->cameraPitch << std::endl;
+
+			if(this->cameraPitch >  89.0f) this->cameraPitch =  89.0f;
 			if(this->cameraPitch < -89.0f) this->cameraPitch = -89.0f;
 
 			glm::vec3 direction;
@@ -190,7 +194,7 @@ void Game::HandleInput(){
 		}
 		if(e.type == SDL_MOUSEWHEEL){
 			fovDegrees -= (f32)e.wheel.y;
-			if(fovDegrees < 1.0f) fovDegrees = 1.0f;
+			if(fovDegrees <  1.0f) fovDegrees =  1.0f;
 			if(fovDegrees > 45.0f) fovDegrees = 45.0f;
 		}
 		if(e.type == SDL_QUIT) this->isRunning = false;
@@ -251,6 +255,10 @@ void Game::Quit(){
 
 void Game::PrintMouseClickPosition(){
 	std::cout << "Mouse Click Position: (" << this->lastMouseClickPosition.x << ", " << this->lastMouseClickPosition.y << ")" << std::endl;
+}
+
+void Game::PrintMousePosition(){
+	std::cout << "Mouse Click Position: (" << this->mousePosition.x << ", " << this->mousePosition.y << ")" << std::endl;
 }
 
 void Game::PrintMouseClickPositionNormalized(){

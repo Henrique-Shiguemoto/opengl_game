@@ -14,6 +14,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "Camera.h"
 #include "main.h"
 
 class Game{
@@ -59,7 +60,7 @@ public:
 	glm::vec2 lastMouseClickPositionNormalized 		= glm::vec2(0.0f);
 	glm::ivec2 mousePosition						= glm::ivec2(windowWidth / 2, windowHeight / 2);
 	glm::ivec2 lastMousePosition					= glm::ivec2(0, 0);
-	f32 mouseSensitivity 							= 0.1f;
+	f32 mouseSensitivity 							= 0.25f;
 	b8 firstMouseInput 								= true;
 
 	//player parameters
@@ -76,8 +77,10 @@ public:
 	glm::vec3 mapDimension_f						= glm::vec3(25.0f, 1.0f, 25.0f);
 	
 	//camera parameters
-	glm::vec3 cameraPosition_f						= glm::vec3(0.0f, 0.0f, 3.0f);
-	glm::vec3 cameraFront_f 						= glm::vec3(0.0f, 0.0f, -1.0f);
+	// Camera camera;
+
+	glm::vec3 cameraPosition_f						= glm::vec3(-9.5f, 10.5f, 15.5f);
+	glm::vec3 cameraFront_f 						= glm::vec3(0.0f, -1.5f, -1.0f);
 	glm::vec3 cameraUp_f							= glm::vec3(0.0f, 1.0f, 0.0f);
 	f32 cameraMaximumSpeed 							= 2.5f;
 	f32 fovDegrees 									= 45.0f;
@@ -92,6 +95,7 @@ public:
 
 private:
 	void PrintMouseClickPosition();
+	void PrintMousePosition();
 	void PrintMouseClickPositionNormalized();
 	void PrintPlayerPosition();
 	void PrintPlayerVelocity();
