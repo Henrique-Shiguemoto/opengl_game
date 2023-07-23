@@ -60,7 +60,7 @@ public:
 	glm::vec2 lastMouseClickPositionNormalized 		= glm::vec2(0.0f);
 	glm::ivec2 mousePosition						= glm::ivec2(windowWidth / 2, windowHeight / 2);
 	glm::ivec2 lastMousePosition					= glm::ivec2(0, 0);
-	f32 mouseSensitivity 							= 0.25f;
+	f32 mouseSensitivity 							= 0.1f;
 	b8 firstMouseInput 								= true;
 
 	//player parameters
@@ -77,21 +77,7 @@ public:
 	glm::vec3 mapDimension_f						= glm::vec3(25.0f, 1.0f, 25.0f);
 	
 	//camera parameters
-	// Camera camera;
-
-	glm::vec3 cameraPosition_f						= glm::vec3(-9.5f, 10.5f, 15.5f);
-	glm::vec3 cameraFront_f 						= glm::vec3(0.0f, -1.5f, -1.0f);
-	glm::vec3 cameraUp_f							= glm::vec3(0.0f, 1.0f, 0.0f);
-	f32 cameraMaximumSpeed 							= 2.5f;
-	f32 fovDegrees 									= 45.0f;
-	f32 nearClipDistance 							= 0.1f;
-	f32 farClipDistance 							= 100.0f;
-	b8 cameraHasToMoveLeft 							= false;
-	b8 cameraHasToMoveRight 						= false;
-	b8 cameraHasToMoveFront 						= false;
-	b8 cameraHasToMoveBack 							= false;
-	f32 cameraYaw 									= -90.0f;
-	f32 cameraPitch									= 0.0f;
+	Camera camera;
 
 private:
 	void PrintMouseClickPosition();

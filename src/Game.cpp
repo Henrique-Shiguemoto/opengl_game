@@ -146,12 +146,12 @@ void Game::HandleInput(){
 	SDL_Event e;
 	while(SDL_PollEvent(&e)){
 		// keyboard stuff
-		const u8* keyboardState 		= SDL_GetKeyboardState(NULL);
-		this->isRunning 				= !keyboardState[SDL_SCANCODE_ESCAPE];
-		this->cameraHasToMoveFront 		= keyboardState[SDL_SCANCODE_W];
-		this->cameraHasToMoveBack 		= keyboardState[SDL_SCANCODE_S];
-		this->cameraHasToMoveLeft 		= keyboardState[SDL_SCANCODE_A];
-		this->cameraHasToMoveRight 		= keyboardState[SDL_SCANCODE_D];
+		const u8* keyboardState 				= SDL_GetKeyboardState(NULL);
+		this->isRunning 						= !keyboardState[SDL_SCANCODE_ESCAPE];
+		this->camera.hasToMoveFront 			= keyboardState[SDL_SCANCODE_W];
+		this->camera.hasToMoveBack 				= keyboardState[SDL_SCANCODE_S];
+		this->camera.hasToMoveLeft 				= keyboardState[SDL_SCANCODE_A];
+		this->camera.hasToMoveRight 			= keyboardState[SDL_SCANCODE_D];
 
 		// mouse
 		if(e.type == SDL_MOUSEBUTTONDOWN){
@@ -179,33 +179,32 @@ void Game::HandleInput(){
 			xMousePosOffset *= this->mouseSensitivity;
 			yMousePosOffset *= this->mouseSensitivity;
 
-			this->cameraYaw   += xMousePosOffset;
-			this->cameraPitch -= yMousePosOffset;
-			std::cout << this->cameraPitch << std::endl;
+			this->camera.yaw   += xMousePosOffset;
+			this->camera.pitch -= yMousePosOffset;
 
-			if(this->cameraPitch >  89.0f) this->cameraPitch =  89.0f;
-			if(this->cameraPitch < -89.0f) this->cameraPitch = -89.0f;
+			if(this->camera.pitch >  89.0f) this->camera.pitch =  89.0f;
+			if(this->camera.pitch < -89.0f) this->camera.pitch = -89.0f;
 
 			glm::vec3 direction;
-			direction.x = glm::cos(glm::radians(this->cameraYaw)) * glm::cos(glm::radians(this->cameraPitch));
-			direction.y = glm::sin(glm::radians(this->cameraPitch));
-			direction.z = glm::sin(glm::radians(this->cameraYaw)) * glm::cos(glm::radians(this->cameraPitch));
-			this->cameraFront_f = glm::normalize(direction);
+			direction.x = glm::cos(glm::radians(this->camera.yaw)) * glm::cos(glm::radians(this->camera.pitch));
+			direction.y = glm::sin(glm::radians(this->camera.pitch));
+			direction.z = glm::sin(glm::radians(this->camera.yaw)) * glm::cos(glm::radians(this->camera.pitch));
+			this->camera.front_f = glm::normalize(direction);
 		}
 		if(e.type == SDL_MOUSEWHEEL){
-			fovDegrees -= (f32)e.wheel.y;
-			if(fovDegrees <  1.0f) fovDegrees =  1.0f;
-			if(fovDegrees > 45.0f) fovDegrees = 45.0f;
+			this->camera.fovDegrees -= (f32)e.wheel.y;
+			if(this->camera.fovDegrees <  1.0f) this->camera.fovDegrees =  1.0f;
+			if(this->camera.fovDegrees > 45.0f) this->camera.fovDegrees = 45.0f;
 		}
 		if(e.type == SDL_QUIT) this->isRunning = false;
 	}
 }
 
 void Game::SimulateWorld(){
-	if(this->cameraHasToMoveFront) this->cameraPosition_f += this->cameraFront_f * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
-	if(this->cameraHasToMoveBack)  this->cameraPosition_f -= this->cameraFront_f * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
-	if(this->cameraHasToMoveLeft)  this->cameraPosition_f -= glm::normalize(glm::cross(this->cameraFront_f, this->cameraUp_f)) * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
-	if(this->cameraHasToMoveRight) this->cameraPosition_f += glm::normalize(glm::cross(this->cameraFront_f, this->cameraUp_f)) * this->cameraMaximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveFront) this->camera.position_f += this->camera.front_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveBack)  this->camera.position_f -= this->camera.front_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveLeft)  this->camera.position_f -= glm::normalize(glm::cross(this->camera.front_f, this->camera.up_f)) * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveRight) this->camera.position_f += glm::normalize(glm::cross(this->camera.front_f, this->camera.up_f)) * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
 }
 
 void Game::RenderGraphics(){
@@ -216,10 +215,10 @@ void Game::RenderGraphics(){
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 
 	// Camera position (nothing for now)
-	glm::mat4 viewMatrix = glm::lookAt(this->cameraPosition_f, this->cameraPosition_f + this->cameraFront_f, this->cameraUp_f);
+	glm::mat4 viewMatrix = glm::lookAt(this->camera.position_f, this->camera.position_f + this->camera.front_f, this->camera.up_f);
 
 	// Perspective projection matrix config
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(this->fovDegrees), this->windowAspectRatio, this->nearClipDistance, this->farClipDistance);
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
 
 	this->shader->Use();
 	this->shader->SetMat4("modelMatrix", modelMatrix);
