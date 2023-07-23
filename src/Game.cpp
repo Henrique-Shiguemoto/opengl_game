@@ -159,8 +159,8 @@ void Game::HandleInput(){
 				SDL_GetMouseState(&this->lastMouseClickPosition.x, &this->lastMouseClickPosition.y);
 				this->playerStartedMoving = true;
 				this->playerIsMoving = true;
-				this->lastMouseClickPositionNormalized.x =  (this->lastMouseClickPosition.x - this->windowWidth * 0.5f) / (this->windowWidth * 0.5f);
-				this->lastMouseClickPositionNormalized.y = -(this->lastMouseClickPosition.y - this->windowHeight * 0.5f) / (this->windowHeight * 0.5f);
+				this->lastMouseClickPositionUnit.x =  (this->lastMouseClickPosition.x - this->windowWidth * 0.5f) / (this->windowWidth * 0.5f);
+				this->lastMouseClickPositionUnit.y = -(this->lastMouseClickPosition.y - this->windowHeight * 0.5f) / (this->windowHeight * 0.5f);
 			}
 		}
 		if(e.type == SDL_MOUSEMOTION){
@@ -260,8 +260,8 @@ void Game::PrintMousePosition(){
 	std::cout << "Mouse Click Position: (" << this->mousePosition.x << ", " << this->mousePosition.y << ")" << std::endl;
 }
 
-void Game::PrintMouseClickPositionNormalized(){
-	std::cout << "Mouse Click Position: (" << this->lastMouseClickPositionNormalized.x << ", " << this->lastMouseClickPositionNormalized.y << ")" << std::endl;
+void Game::PrintMouseClickPositionUnit(){
+	std::cout << "Mouse Click Position: (" << this->lastMouseClickPositionUnit.x << ", " << this->lastMouseClickPositionUnit.y << ")" << std::endl;
 }
 
 void Game::PrintPlayerPosition(){
