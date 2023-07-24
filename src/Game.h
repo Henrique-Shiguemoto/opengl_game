@@ -20,7 +20,7 @@
 class Game{
 	
 public:
-	Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vertexShaderFilepath, const char* fragmentShaderFilepath, const char* windowIconFilepath);
+	Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen);
 	void HandleInput();
 	void SimulateWorld();
 	void RenderGraphics();
@@ -28,7 +28,7 @@ public:
 	void Quit();
 
 public:
-	std::string 	name 							= "Custom Game Name";
+	std::string 	windowTitle						= "Custom Game Name";
 	
 	//window stuff
 	SDL_Window* 	window 							= nullptr;

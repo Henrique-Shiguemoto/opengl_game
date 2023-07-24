@@ -3,10 +3,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vertexShaderFilepath, const char* fragmentShaderFilepath, const char* windowIconFilepath){
-	this->name = name;
+Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
+	this->windowTitle = name;
 	this->windowWidth = windowWidth;
 	this->windowHeight = windowHeight;
+	this->windowAspectRatio = (f32)this->windowWidth / (f32)this->windowHeight;
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -18,7 +19,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 		return;
 	}
 
-	this->window = SDL_CreateWindow(this->name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
+	this->window = SDL_CreateWindow(this->windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
 	if(!this->window){
 		std::cout << "Couldn't create the window!\n" << std::endl;
 		this->isValid = false;
@@ -30,7 +31,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	SDL_WarpMouseInWindow(this->window, this->windowWidth / 2, this->windowHeight / 2); // fix the mouse in the middle of the screen always
 
 	i32 iconWidth, iconHeight, iconChannelCount;
-	u8* iconPixels = stbi_load(windowIconFilepath, &iconWidth, &iconHeight, &iconChannelCount, 0);
+	u8* iconPixels = stbi_load("assets/spaceship.png", &iconWidth, &iconHeight, &iconChannelCount, 0);
 	if(!iconPixels){
 		std::cout << "Couldn't load icon image" << std::endl;
 		this->isValid = false;
@@ -66,7 +67,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, const char* vert
 	glEnable(GL_DEPTH_TEST);
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
-	this->shader = new Shader(vertexShaderFilepath, fragmentShaderFilepath);
+	this->shader = new Shader("shaders/shader.vs", "shaders/shader.fs");
 
 	f32 mapVertices[] = {
 		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near

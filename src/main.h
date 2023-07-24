@@ -13,10 +13,10 @@ typedef unsigned short u16;
 typedef unsigned int u32;
 typedef unsigned long long u64;
 
-#define GAME_NAME 		"OpenGL Game"
-#define WINDOW_WIDTH 	800
-#define WINDOW_HEIGHT 	600
-#define ASPECT_RATIO 	((f32)WINDOW_WIDTH / (f32)WINDOW_HEIGHT)
+#define GAME_NAME 				"OpenGL Game"
+#define WINDOW_WIDTH 			800
+#define WINDOW_HEIGHT 			600
+#define ASPECT_RATIO 			((f32)WINDOW_WIDTH / (f32)WINDOW_HEIGHT)
 
 struct PerformanceData{
 	f32 currentTimeInSeconds 		= 0;
