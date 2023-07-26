@@ -27,15 +27,14 @@ public:
 	void UpdatePerformanceData();
 	void Quit();
 
-public:
-	std::string 	windowTitle						= "Custom Game Name";
-	
+public:	
 	//window stuff
 	SDL_Window* 	window 							= nullptr;
 	SDL_GLContext 	context 						= NULL;
 	i32 			windowWidth 					= 800;
 	i32 			windowHeight 					= 600;
 	f32 			windowAspectRatio				= windowWidth / windowHeight;
+	std::string 	windowTitle						= "Custom Game Name";
 	
 	//performance
 	PerformanceData performanceData;
@@ -47,21 +46,29 @@ public:
 	b8 				isValid							= false;
 	
 	//opengl stuff
-	Shader* 		shader							= nullptr;
+	Shader* 		shader_noTextures				= nullptr;
+	Shader* 		shader_withTextures				= nullptr;
 	VertexArray* 	vaoPlayer						= nullptr;
 	VertexBuffer* 	vboPlayer						= nullptr;
 	IndexBuffer* 	iboPlayer 						= nullptr;
 	VertexArray* 	vaoMap							= nullptr;
 	VertexBuffer* 	vboMap							= nullptr;
 	IndexBuffer* 	iboMap 							= nullptr;
+	VertexArray* 	vaoCursor						= nullptr;
+	VertexBuffer* 	vboCursor						= nullptr;
+	IndexBuffer* 	iboCursor						= nullptr;
 
 	//mouse stuff
 	glm::ivec2 		lastMouseClickPosition 			= glm::ivec2(0, 0);
 	glm::vec2 		lastMouseClickPositionUnit 		= glm::vec2(0.0f);
 	glm::ivec2 		mousePosition					= glm::ivec2(windowWidth / 2, windowHeight / 2);
+	glm::vec3 		mousePositionUnit				= glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::ivec2 		lastMousePosition				= glm::ivec2(0, 0);
+	glm::ivec2 		mouseDimension					= glm::ivec2(32, 32); // in pixels
+	glm::vec2 		mouseDimensionUnit				= glm::vec2(32.0f / (f32)this->windowWidth, 32.0f / (f32)this->windowHeight);
 	f32 			mouseSensitivity 				= 0.1f;
 	b8 				firstMouseInput 				= true;
+	i32 			pixelsFromBorderToMove 			= 15;
 
 	//player parameters
 	glm::vec3 		playerPosition_f				= glm::vec3(-11.0f, 0.75f, 11.0f);
@@ -78,9 +85,14 @@ public:
 	
 	Camera camera;
 
+	// textures stuff
+	u32 cursorTextureId;
+
+
 private:
 	void PrintMouseClickPosition();
 	void PrintMousePosition();
+	void PrintMousePositionUnit();
 	void PrintMouseClickPositionUnit();
 	void PrintPlayerPosition();
 	void PrintPlayerVelocity();

@@ -26,10 +26,12 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 		return;
 	}
 
-	SDL_ShowCursor(SDL_DISABLE);
+	// SDL_ShowCursor(SDL_DISABLE);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_WarpMouseInWindow(this->window, this->windowWidth / 2, this->windowHeight / 2); // fix the mouse in the middle of the screen always
+	stbi_set_flip_vertically_on_load(true);
 
+	// icon
 	i32 iconWidth, iconHeight, iconChannelCount;
 	u8* iconPixels = stbi_load("assets/spaceship.png", &iconWidth, &iconHeight, &iconChannelCount, 0);
 	if(!iconPixels){
@@ -64,12 +66,32 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 		return;
 	}
 
+	// cursor texture
+	glGenTextures(1, &(this->cursorTextureId));
+	glBindTexture(GL_TEXTURE_2D, this->cursorTextureId);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	i32 cursorWidth, cursorHeight, cursorChannelCount;
+	u8* cursorImageData = stbi_load("assets/cursor.png", &cursorWidth, &cursorHeight, &cursorChannelCount, 0);
+	if (!cursorImageData){
+		std::cout << "Failed to load texture\n";
+		this->isValid = false;
+		return;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cursorWidth, cursorHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, cursorImageData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(cursorImageData);
+
 	glEnable(GL_DEPTH_TEST);
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
-	this->shader = new Shader("shaders/shader.vs", "shaders/shader.fs");
+	this->shader_noTextures 	= new Shader("shaders/shader_noTextures.vs", "shaders/shader_noTextures.fs");
+	this->shader_withTextures 	= new Shader("shaders/shader_withTextures.vs", "shaders/shader_withTextures.fs");
 
 	f32 mapVertices[] = {
+		//position + colors
 		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
 		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
 		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
@@ -96,6 +118,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	};
 
 	f32 playerVertices[] = {
+		//position + colors
 		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
 		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
 		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
@@ -121,6 +144,19 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 		3, 4, 7
 	};
 
+	f32 cursorVertices[] = {
+		// positions + uvs
+		this->mousePositionUnit.x - 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y - 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 0.0f, 0.0f,
+		this->mousePositionUnit.x + 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y - 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 1.0f, 0.0f,
+		this->mousePositionUnit.x - 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y + 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 0.0f, 1.0f,
+		this->mousePositionUnit.x + 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y + 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 1.0f, 1.0f
+	};
+
+	u32 cursorIndices[] = {
+		0, 1, 2,
+        1, 2, 3 
+	};
+
 	this->vaoPlayer = new VertexArray();
 	this->vaoPlayer->Bind();
 	this->vboPlayer = new VertexBuffer(playerVertices, sizeof(playerVertices));
@@ -135,9 +171,16 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	this->vaoMap->DefineVBOLayout(vboMap, 0, 3, 24, 0);
 	this->vaoMap->DefineVBOLayout(vboMap, 1, 3, 24, 3);
 
+	this->vaoCursor = new VertexArray();
+	this->vaoCursor->Bind();
+	this->vboCursor = new VertexBuffer(cursorVertices, sizeof(cursorVertices));
+	this->iboCursor = new IndexBuffer(cursorIndices, sizeof(cursorIndices));
+	this->vaoCursor->DefineVBOLayout(vboCursor, 0, 3, 20, 0);
+	this->vaoCursor->DefineVBOLayout(vboCursor, 1, 2, 20, 3);
+
 	this->isValid = true;
 	this->isRunning = true;
-	this->isFullscreen = false;
+	this->isFullscreen = fullscreen;
 	this->isVSyncEnabled = true;
 }
 
@@ -149,48 +192,44 @@ void Game::HandleInput(){
 		// keyboard stuff
 		const u8* keyboardState 				= SDL_GetKeyboardState(NULL);
 		this->isRunning 						= !keyboardState[SDL_SCANCODE_ESCAPE];
-		this->camera.hasToMoveFront 			= keyboardState[SDL_SCANCODE_W];
-		this->camera.hasToMoveBack 				= keyboardState[SDL_SCANCODE_S];
+		this->camera.hasToMoveUp 				= keyboardState[SDL_SCANCODE_W];
+		this->camera.hasToMoveDown 				= keyboardState[SDL_SCANCODE_S];
 		this->camera.hasToMoveLeft 				= keyboardState[SDL_SCANCODE_A];
 		this->camera.hasToMoveRight 			= keyboardState[SDL_SCANCODE_D];
 
 		// mouse
 		if(e.type == SDL_MOUSEBUTTONDOWN){
 			if(e.button.button == SDL_BUTTON_RIGHT){
-				SDL_GetMouseState(&this->lastMouseClickPosition.x, &this->lastMouseClickPosition.y);
-				this->playerStartedMoving = true;
-				this->playerIsMoving = true;
-				this->lastMouseClickPositionUnit.x =  (this->lastMouseClickPosition.x - this->windowWidth * 0.5f) / (this->windowWidth * 0.5f);
-				this->lastMouseClickPositionUnit.y = -(this->lastMouseClickPosition.y - this->windowHeight * 0.5f) / (this->windowHeight * 0.5f);
+				// PLAYER MOVEMENT
 			}
 		}
 		if(e.type == SDL_MOUSEMOTION){
-			if(this->firstMouseInput){
-				this->mousePosition.x = e.motion.x;
-				this->mousePosition.y = e.motion.y;
-				this->firstMouseInput = false;
+			// This is the only place in the code where the mouse position variable actually changes, 
+			//			since if it doesn't move, it doesn't need to change.
+			// Because of that, I'm synchronizing the Y axis between SDL2 and OpenGL, SDL2 uses a Y-is-Down coordinate system.
+			this->mousePosition.x = e.motion.x;
+			this->mousePosition.y = this->windowHeight - e.motion.y - 1;
+			this->mousePositionUnit.x = (this->mousePosition.x - 0.5f * (this->windowWidth - 1)) / (0.5f * (this->windowWidth - 1));
+			this->mousePositionUnit.y = (this->mousePosition.y - 0.5f * (this->windowHeight - 1)) / (0.5f * (this->windowHeight - 1));
+			this->mousePositionUnit.z = 0.0f;
+			
+			// camera motion (only moves if the cursor close is close to the window border)
+			if(this->mousePosition.x >= this->windowWidth - this->pixelsFromBorderToMove){
+				this->camera.hasToMoveRight = true;
+				this->camera.hasToMoveLeft 	= false;
 			}
-
-			f32 xMousePosOffset = e.motion.xrel;
-			f32 yMousePosOffset = e.motion.yrel;
-
-			this->lastMousePosition.x = this->mousePosition.x;
-			this->lastMousePosition.y = this->mousePosition.y;
-
-			xMousePosOffset *= this->mouseSensitivity;
-			yMousePosOffset *= this->mouseSensitivity;
-
-			this->camera.yaw   += xMousePosOffset;
-			this->camera.pitch -= yMousePosOffset;
-
-			if(this->camera.pitch >  89.0f) this->camera.pitch =  89.0f;
-			if(this->camera.pitch < -89.0f) this->camera.pitch = -89.0f;
-
-			glm::vec3 direction;
-			direction.x = glm::cos(glm::radians(this->camera.yaw)) * glm::cos(glm::radians(this->camera.pitch));
-			direction.y = glm::sin(glm::radians(this->camera.pitch));
-			direction.z = glm::sin(glm::radians(this->camera.yaw)) * glm::cos(glm::radians(this->camera.pitch));
-			this->camera.front_f = glm::normalize(direction);
+			if(this->mousePosition.x <= this->pixelsFromBorderToMove){
+				this->camera.hasToMoveLeft 	= true;
+				this->camera.hasToMoveRight = false;
+			}
+			if(this->mousePosition.y >= this->windowHeight - this->pixelsFromBorderToMove){
+				this->camera.hasToMoveUp 	= true;
+				this->camera.hasToMoveDown 	= false;
+			}
+			if(this->mousePosition.y <= this->pixelsFromBorderToMove){
+				this->camera.hasToMoveDown 	= true;
+				this->camera.hasToMoveUp 	= false;
+			}
 		}
 		if(e.type == SDL_MOUSEWHEEL){
 			this->camera.fovDegrees -= (f32)e.wheel.y;
@@ -202,37 +241,38 @@ void Game::HandleInput(){
 }
 
 void Game::SimulateWorld(){
-	if(this->camera.hasToMoveFront) this->camera.position_f += this->camera.front_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
-	if(this->camera.hasToMoveBack)  this->camera.position_f -= this->camera.front_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
-	if(this->camera.hasToMoveLeft)  this->camera.position_f -= glm::normalize(glm::cross(this->camera.front_f, this->camera.up_f)) * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
-	if(this->camera.hasToMoveRight) this->camera.position_f += glm::normalize(glm::cross(this->camera.front_f, this->camera.up_f)) * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveUp)	this->camera.position_f += this->camera.up_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveDown)	this->camera.position_f -= this->camera.up_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveRight)	this->camera.position_f += this->camera.right_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->camera.hasToMoveLeft)	this->camera.position_f -= this->camera.right_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
 }
 
 void Game::RenderGraphics(){
 	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Position/Scale/Rotate the objects in their place
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	// calculating and setting matrix uniforms
+	glm::mat4 modelMatrix 		= glm::mat4(1.0f);
+	glm::mat4 viewMatrix 		= glm::lookAt(this->camera.position_f, this->camera.position_f + this->camera.front_f, this->camera.up_f);
+	glm::mat4 projectionMatrix 	= glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
+	this->shader_noTextures->Use();
+	this->shader_noTextures->SetMat4("modelMatrix", modelMatrix);
+	this->shader_noTextures->SetMat4("viewMatrix", viewMatrix);
+	this->shader_noTextures->SetMat4("projectionMatrix", projectionMatrix);
 
-	// Camera position (nothing for now)
-	glm::mat4 viewMatrix = glm::lookAt(this->camera.position_f, this->camera.position_f + this->camera.front_f, this->camera.up_f);
-
-	// Perspective projection matrix config
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
-
-	this->shader->Use();
-	this->shader->SetMat4("modelMatrix", modelMatrix);
-	this->shader->SetMat4("viewMatrix", viewMatrix);
-	this->shader->SetMat4("projectionMatrix", projectionMatrix);
-
-	//drawing player
 	this->vaoPlayer->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-
-	//drawing map
 	this->vaoMap->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	this->shader_withTextures->Use();
+	glm::mat4 cursorPos = glm::translate(glm::mat4(1.0f), this->mousePositionUnit);
+	this->shader_withTextures->SetMat4("cursorOffsetMatrix", cursorPos);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->cursorTextureId);
+	this->vaoCursor->Bind();
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	SDL_GL_SwapWindow(this->window);
 }
@@ -244,10 +284,17 @@ void Game::UpdatePerformanceData(){
 }
 
 void Game::Quit(){
-	shader->Delete();
+	shader_noTextures->Delete();
+	shader_withTextures->Delete();
+	vaoPlayer->Delete();
 	vboPlayer->Delete();
 	iboPlayer->Delete();
-	vaoPlayer->Delete();
+	vaoMap->Delete();
+	vboMap->Delete();
+	iboMap->Delete();
+	vaoCursor->Delete();
+	vboCursor->Delete();
+	iboCursor->Delete();
 	SDL_GL_DeleteContext(this->context);
 	SDL_DestroyWindow(this->window);
 	SDL_Quit();
@@ -258,7 +305,11 @@ void Game::PrintMouseClickPosition(){
 }
 
 void Game::PrintMousePosition(){
-	std::cout << "Mouse Click Position: (" << this->mousePosition.x << ", " << this->mousePosition.y << ")" << std::endl;
+	std::cout << "Mouse Position: (" << this->mousePosition.x << ", " << this->mousePosition.y << ")" << std::endl;
+}
+
+void Game::PrintMousePositionUnit(){
+	std::cout << "Mouse Position Unit: (" << this->mousePositionUnit.x << ", " << this->mousePositionUnit.y << ", " << this->mousePositionUnit.z << ")" << std::endl;
 }
 
 void Game::PrintMouseClickPositionUnit(){
