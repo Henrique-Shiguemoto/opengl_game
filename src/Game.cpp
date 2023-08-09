@@ -119,14 +119,14 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 
 	f32 playerVertices[] = {
 		//position + colors
-		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
-		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
-		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
-		this->playerPosition_f.x - 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 1.0f, //left-bottom-far
-		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 0.0f, //right-bottom-near
-		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z + 0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 1.0f, //right-top-near
-		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y + 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 0.0f, //right-top-far
-		this->playerPosition_f.x + 0.5f*this->playerDimension_f.x, this->playerPosition_f.y - 0.5f*this->playerDimension_f.y, this->playerPosition_f.z - 0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 1.0f //right-bottom-far
+		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
+		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
+		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
+		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 1.0f, //left-bottom-far
+		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 0.0f, //right-bottom-near
+		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 1.0f, //right-top-near
+		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 0.0f, //right-top-far
+		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 1.0f //right-bottom-far
 	};
 
 	u32 playerIndices[] = {
@@ -192,15 +192,11 @@ void Game::HandleInput(){
 		// keyboard stuff
 		const u8* keyboardState 				= SDL_GetKeyboardState(NULL);
 		this->isRunning 						= !keyboardState[SDL_SCANCODE_ESCAPE];
-		this->camera.hasToMoveUp 				= keyboardState[SDL_SCANCODE_W];
-		this->camera.hasToMoveDown 				= keyboardState[SDL_SCANCODE_S];
-		this->camera.hasToMoveLeft 				= keyboardState[SDL_SCANCODE_A];
-		this->camera.hasToMoveRight 			= keyboardState[SDL_SCANCODE_D];
 
 		// mouse
 		if(e.type == SDL_MOUSEBUTTONDOWN){
 			if(e.button.button == SDL_BUTTON_RIGHT){
-				// PLAYER MOVEMENT
+				this->playerHasClicked = true;
 			}
 		}
 		if(e.type == SDL_MOUSEMOTION){
@@ -212,24 +208,6 @@ void Game::HandleInput(){
 			this->mousePositionUnit.x = (this->mousePosition.x - 0.5f * (this->windowWidth - 1)) / (0.5f * (this->windowWidth - 1));
 			this->mousePositionUnit.y = (this->mousePosition.y - 0.5f * (this->windowHeight - 1)) / (0.5f * (this->windowHeight - 1));
 			this->mousePositionUnit.z = 0.0f;
-			
-			// camera motion (only moves if the cursor close is close to the window border)
-			if(this->mousePosition.x >= this->windowWidth - this->pixelsFromBorderToMove){
-				this->camera.hasToMoveRight = true;
-				this->camera.hasToMoveLeft 	= false;
-			}
-			if(this->mousePosition.x <= this->pixelsFromBorderToMove){
-				this->camera.hasToMoveLeft 	= true;
-				this->camera.hasToMoveRight = false;
-			}
-			if(this->mousePosition.y >= this->windowHeight - this->pixelsFromBorderToMove){
-				this->camera.hasToMoveUp 	= true;
-				this->camera.hasToMoveDown 	= false;
-			}
-			if(this->mousePosition.y <= this->pixelsFromBorderToMove){
-				this->camera.hasToMoveDown 	= true;
-				this->camera.hasToMoveUp 	= false;
-			}
 		}
 		if(e.type == SDL_MOUSEWHEEL){
 			this->camera.fovDegrees -= (f32)e.wheel.y;
@@ -238,6 +216,30 @@ void Game::HandleInput(){
 		}
 		if(e.type == SDL_QUIT) this->isRunning = false;
 	}
+
+	//This probably shouldn't be here.
+	// camera motion (only moves if the cursor is close to the window border)
+	if(this->mousePosition.x >= this->windowWidth - this->pixelsFromBorderToMove){
+		this->camera.hasToMoveRight = true;
+		this->camera.hasToMoveLeft 	= false;
+	}else if(this->mousePosition.x <= this->pixelsFromBorderToMove){
+		this->camera.hasToMoveLeft 	= true;
+		this->camera.hasToMoveRight = false;
+	}else{
+		this->camera.hasToMoveLeft 	= false;
+		this->camera.hasToMoveRight = false;
+	}
+
+	if(this->mousePosition.y >= this->windowHeight - this->pixelsFromBorderToMove){
+		this->camera.hasToMoveUp 	= true;
+		this->camera.hasToMoveDown 	= false;
+	}else if(this->mousePosition.y <= this->pixelsFromBorderToMove){
+		this->camera.hasToMoveDown 	= true;
+		this->camera.hasToMoveUp 	= false;
+	}else{
+		this->camera.hasToMoveDown 	= false;
+		this->camera.hasToMoveUp 	= false;
+	}
 }
 
 void Game::SimulateWorld(){
@@ -245,6 +247,49 @@ void Game::SimulateWorld(){
 	if(this->camera.hasToMoveDown)	this->camera.position_f -= this->camera.up_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
 	if(this->camera.hasToMoveRight)	this->camera.position_f += this->camera.right_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
 	if(this->camera.hasToMoveLeft)	this->camera.position_f -= this->camera.right_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+
+	if(this->playerHasClicked){
+		// Mouse raycast
+		// Normalized Device Coordinates
+		this->currentMouseRay.x = this->mousePositionUnit.x;
+		this->currentMouseRay.y = this->mousePositionUnit.y;
+
+		// Homogeneous Clip Space
+		glm::vec4 rayClip = glm::vec4(this->currentMouseRay.x, this->currentMouseRay.y, -1.0f, 1.0f);
+
+		// Camera Space Coordinates
+		glm::vec4 rayEye = glm::inverse(this->projectionMatrix) * rayClip;
+		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+		// World Coordinates
+		glm::vec4 rayWorld4D = glm::inverse(this->viewMatrix) * rayEye;
+		glm::vec3 rayWorld = glm::vec3(rayWorld4D.x, rayWorld4D.y, rayWorld4D.z);
+		rayWorld = glm::normalize(rayWorld);
+
+		glm::vec3 rayMapTopSurfaceCollision = glm::vec3(this->camera.position_f.x + rayWorld.x * ((this->randomPointFromMapTopSurface_f.y - this->camera.position_f.y) / rayWorld.y),
+														this->randomPointFromMapTopSurface_f.y,
+														this->camera.position_f.z + rayWorld.z * ((this->randomPointFromMapTopSurface_f.y - this->camera.position_f.y) / rayWorld.y));
+		
+		rayMapTopSurfaceCollision = glm::clamp(rayMapTopSurfaceCollision, glm::vec3(this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z),
+																		  glm::vec3(this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z));
+
+		this->locationPlayerHasToGo = glm::vec3(rayMapTopSurfaceCollision.x, rayMapTopSurfaceCollision.y + 0.5f*this->playerDimension_f.y, rayMapTopSurfaceCollision.z);
+		this->PrintLocationPlayerHasToGo();
+		this->playerVelocity_f = glm::normalize(this->locationPlayerHasToGo - this->playerPosition_f);
+		this->playerIsMoving = true;
+		this->playerHasClicked = false;
+	}
+
+	if(this->playerIsMoving){
+		this->playerPosition_f += this->playerVelocity_f * this->playerMaximumSpeed * this->performanceData.deltaTimeInSeconds;
+		this->PrintPlayerPosition();
+		
+		f32 distanceBetweenDestinationAndPlayer = glm::distance(this->locationPlayerHasToGo, this->playerPosition_f);
+		if(distanceBetweenDestinationAndPlayer <= distanceForPlayerToStopMoving){
+			this->playerVelocity_f = glm::vec3(0.0f);
+			this->playerIsMoving = false;
+		}
+	}
 }
 
 void Game::RenderGraphics(){
@@ -252,17 +297,19 @@ void Game::RenderGraphics(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// calculating and setting matrix uniforms
-	glm::mat4 modelMatrix 		= glm::mat4(1.0f);
-	glm::mat4 viewMatrix 		= glm::lookAt(this->camera.position_f, this->camera.position_f + this->camera.front_f, this->camera.up_f);
-	glm::mat4 projectionMatrix 	= glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
+	this->modelMatrix 		= glm::mat4(1.0f);
+	this->viewMatrix 		= glm::lookAt(this->camera.position_f, this->camera.position_f + this->camera.front_f, this->camera.up_f);
+	this->projectionMatrix 	= glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
 	this->shader_noTextures->Use();
 	this->shader_noTextures->SetMat4("modelMatrix", modelMatrix);
 	this->shader_noTextures->SetMat4("viewMatrix", viewMatrix);
 	this->shader_noTextures->SetMat4("projectionMatrix", projectionMatrix);
-
-	this->vaoPlayer->Bind();
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	this->vaoMap->Bind();
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	this->modelMatrix 		= glm::translate(glm::mat4(1.0f), this->playerPosition_f);
+	this->shader_noTextures->SetMat4("modelMatrix", modelMatrix);
+	this->vaoPlayer->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	this->shader_withTextures->Use();
@@ -317,11 +364,15 @@ void Game::PrintMouseClickPositionUnit(){
 }
 
 void Game::PrintPlayerPosition(){
-	std::cout << "Player's Position: (" << this->playerPosition_f.x << ", " << this->playerPosition_f.y << ")" << std::endl;
+	std::cout << "Player's Position: (" << this->playerPosition_f.x << ", " << this->playerPosition_f.y << ", " << this->playerPosition_f.z << ")" << std::endl;
 }
 
 void Game::PrintPlayerVelocity(){
-	std::cout << "Player's Velocity: (" << this->playerVelocity_f[0] << ", " << this->playerVelocity_f[1] << ")" << std::endl;
+	std::cout << "Player's Velocity: (" << this->playerVelocity_f.x << ", " << this->playerVelocity_f.y << ")" << std::endl;
+}
+
+void Game::PrintLocationPlayerHasToGo(){
+	std::cout << "Location Player has to go = (" << this->locationPlayerHasToGo.x << ", " << this->locationPlayerHasToGo.y << ", " << this->locationPlayerHasToGo.z << std::endl;
 }
 
 void Game::PrintDeltaTime(){

@@ -58,6 +58,11 @@ public:
 	VertexBuffer* 	vboCursor						= nullptr;
 	IndexBuffer* 	iboCursor						= nullptr;
 
+	//rendering matrices
+	glm::mat4 modelMatrix 							= glm::mat4(1.0f);
+	glm::mat4 viewMatrix 							= glm::mat4(1.0f);
+	glm::mat4 projectionMatrix 						= glm::mat4(1.0f);
+
 	//mouse stuff
 	glm::ivec2 		lastMouseClickPosition 			= glm::ivec2(0, 0);
 	glm::vec2 		lastMouseClickPositionUnit 		= glm::vec2(0.0f);
@@ -69,25 +74,28 @@ public:
 	f32 			mouseSensitivity 				= 0.1f;
 	b8 				firstMouseInput 				= true;
 	i32 			pixelsFromBorderToMove 			= 15;
+	glm::vec3 		currentMouseRay 				= glm::vec3(0.0f, 0.0f, 1.0f);
 
 	//player parameters
 	glm::vec3 		playerPosition_f				= glm::vec3(-11.0f, 0.75f, 11.0f);
 	glm::vec3 		playerDimension_f				= glm::vec3(0.5f, 0.5f, 0.5f);
 	glm::vec3 		playerVelocity_f				= glm::vec3(0.0f);
-	f32 			playerMaximumSpeed				= 0.05f;
+	glm::vec3 		locationPlayerHasToGo 			= playerPosition_f;
+	f32 			playerMaximumSpeed				= 0.25f;
 	b8  			playerStartedMoving				= false;
 	b8  			playerIsMoving					= false;
+	b8 				playerHasClicked 				= false;
 	f32 			distanceForPlayerToStopMoving	= 0.005f;
 
 	//map parameters
 	glm::vec3 		mapPosition_f					= glm::vec3(0.0f);
+	glm::vec3 		randomPointFromMapTopSurface_f	= glm::vec3(0.0f, 0.5f, 0.0f);
 	glm::vec3 		mapDimension_f					= glm::vec3(25.0f, 1.0f, 25.0f);
 	
 	Camera camera;
 
 	// textures stuff
 	u32 cursorTextureId;
-
 
 private:
 	void PrintMouseClickPosition();
@@ -96,5 +104,6 @@ private:
 	void PrintMouseClickPositionUnit();
 	void PrintPlayerPosition();
 	void PrintPlayerVelocity();
+	void PrintLocationPlayerHasToGo();
 	void PrintDeltaTime();
 };
