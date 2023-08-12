@@ -67,39 +67,26 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	}
 
 	// cursor texture
-	glGenTextures(1, &(this->cursorTextureId));
-	glBindTexture(GL_TEXTURE_2D, this->cursorTextureId);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	i32 cursorWidth, cursorHeight, cursorChannelCount;
-	u8* cursorImageData = stbi_load("assets/cursor.png", &cursorWidth, &cursorHeight, &cursorChannelCount, 0);
-	if (!cursorImageData){
-		std::cout << "Failed to load texture\n";
-		this->isValid = false;
-		return;
-	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cursorWidth, cursorHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, cursorImageData);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	stbi_image_free(cursorImageData);
+	this->cursorTexture = new Texture("assets/cursor.png", GL_NEAREST, GL_RGBA, GL_TEXTURE0, true);
+	this->playerTexture = new Texture("assets/spaceship.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
+	this->mapTexture 	= new Texture("assets/map_moba.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
 
 	glEnable(GL_DEPTH_TEST);
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
-	this->shader_noTextures 	= new Shader("shaders/shader_noTextures.vs", "shaders/shader_noTextures.fs");
-	this->shader_withTextures 	= new Shader("shaders/shader_withTextures.vs", "shaders/shader_withTextures.fs");
+	this->shader_withTextures = new Shader("shaders/shader_withTextures.vs", "shaders/shader_withTextures.fs");
+	this->shader_UI = new Shader("shaders/shader_UI.vs", "shaders/shader_UI.fs");
 
 	f32 mapVertices[] = {
 		//position + colors
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 1.0f, 1.0f, //left-bottom-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, 1.0f, //right-top-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, 0.0f, //right-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, 1.0f //right-bottom-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //left-bottom-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //left-top-near
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 1.0f, //left-top-far
+		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //left-bottom-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //right-bottom-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, //right-top-near
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, //right-top-far
+		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.0f  //right-bottom-far
 	};
 
 	u32 mapIndices[] = {
@@ -119,14 +106,14 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 
 	f32 playerVertices[] = {
 		//position + colors
-		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 0.0f, //left-bottom-near
-		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, 1.0f, //left-top-near
-		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 0.0f, //left-top-far
-		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 1.0f, 1.0f, //left-bottom-far
-		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 0.0f, //right-bottom-near
-		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 1.0f, 0.0f, 1.0f, //right-top-near
-		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 0.0f, //right-top-far
-		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 1.0f, 1.0f, 1.0f //right-bottom-far
+		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //left-bottom-near
+		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //left-top-near
+		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 1.0f, //left-top-far
+		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //left-bottom-far
+		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //right-bottom-near
+		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 1.0f, 0.0f, //right-top-near
+		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 1.0f, 1.0f, //right-top-far
+		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 0.0f  //right-bottom-far
 	};
 
 	u32 playerIndices[] = {
@@ -146,10 +133,10 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 
 	f32 cursorVertices[] = {
 		// positions + uvs
-		this->mousePositionUnit.x - 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y - 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 0.0f, 0.0f,
-		this->mousePositionUnit.x + 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y - 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 1.0f, 0.0f,
-		this->mousePositionUnit.x - 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y + 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 0.0f, 1.0f,
-		this->mousePositionUnit.x + 0.5f * this->mouseDimensionUnit.x, this->mousePositionUnit.y + 0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 1.0f, 1.0f
+		-0.5f * this->mouseDimensionUnit.x, -0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 0.0f, 0.0f,
+		+0.5f * this->mouseDimensionUnit.x, -0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 1.0f, 0.0f,
+		-0.5f * this->mouseDimensionUnit.x, +0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 0.0f, 1.0f,
+		+0.5f * this->mouseDimensionUnit.x, +0.5f * this->mouseDimensionUnit.y, this->mousePositionUnit.z, 1.0f, 1.0f
 	};
 
 	u32 cursorIndices[] = {
@@ -161,15 +148,15 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	this->vaoPlayer->Bind();
 	this->vboPlayer = new VertexBuffer(playerVertices, sizeof(playerVertices));
 	this->iboPlayer = new IndexBuffer(playerIndices, sizeof(playerIndices));
-	this->vaoPlayer->DefineVBOLayout(vboPlayer, 0, 3, 24, 0);
-	this->vaoPlayer->DefineVBOLayout(vboPlayer, 1, 3, 24, 3);
+	this->vaoPlayer->DefineVBOLayout(vboPlayer, 0, 3, 20, 0);
+	this->vaoPlayer->DefineVBOLayout(vboPlayer, 1, 2, 20, 3);
 	
 	this->vaoMap = new VertexArray();
 	this->vaoMap->Bind();
 	this->vboMap = new VertexBuffer(mapVertices, sizeof(mapVertices));
 	this->iboMap = new IndexBuffer(mapIndices, sizeof(mapIndices));
-	this->vaoMap->DefineVBOLayout(vboMap, 0, 3, 24, 0);
-	this->vaoMap->DefineVBOLayout(vboMap, 1, 3, 24, 3);
+	this->vaoMap->DefineVBOLayout(vboMap, 0, 3, 20, 0);
+	this->vaoMap->DefineVBOLayout(vboMap, 1, 2, 20, 3);
 
 	this->vaoCursor = new VertexArray();
 	this->vaoCursor->Bind();
@@ -282,8 +269,6 @@ void Game::SimulateWorld(){
 
 	if(this->playerIsMoving){
 		this->playerPosition_f += this->playerVelocity_f * this->playerMaximumSpeed * this->performanceData.deltaTimeInSeconds;
-		this->PrintPlayerPosition();
-		
 		f32 distanceBetweenDestinationAndPlayer = glm::distance(this->locationPlayerHasToGo, this->playerPosition_f);
 		if(distanceBetweenDestinationAndPlayer <= distanceForPlayerToStopMoving){
 			this->playerVelocity_f = glm::vec3(0.0f);
@@ -296,28 +281,37 @@ void Game::RenderGraphics(){
 	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// calculating and setting matrix uniforms
-	this->modelMatrix 		= glm::mat4(1.0f);
-	this->viewMatrix 		= glm::lookAt(this->camera.position_f, this->camera.position_f + this->camera.front_f, this->camera.up_f);
-	this->projectionMatrix 	= glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
-	this->shader_noTextures->Use();
-	this->shader_noTextures->SetMat4("modelMatrix", modelMatrix);
-	this->shader_noTextures->SetMat4("viewMatrix", viewMatrix);
-	this->shader_noTextures->SetMat4("projectionMatrix", projectionMatrix);
+	//Drawing the objects
+	this->shader_withTextures->Use();
+
+	// Draw map
+	this->mapTexture->Activate();
+	this->mapTexture->Bind();
+	this->modelMatrix = glm::mat4(1.0f);
+	this->viewMatrix = glm::lookAt(this->camera.position_f, this->camera.position_f + this->camera.front_f, this->camera.up_f);
+	this->projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
+	this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
+	this->shader_withTextures->SetMat4("viewMatrix", this->viewMatrix);
+	this->shader_withTextures->SetMat4("projectionMatrix", this->projectionMatrix);
 	this->vaoMap->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-	this->modelMatrix 		= glm::translate(glm::mat4(1.0f), this->playerPosition_f);
-	this->shader_noTextures->SetMat4("modelMatrix", modelMatrix);
+	// Draw Player
+	this->playerTexture->Activate();
+	this->playerTexture->Bind();
+	this->modelMatrix = glm::translate(glm::mat4(1.0f), this->playerPosition_f);
+	this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
 	this->vaoPlayer->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-	this->shader_withTextures->Use();
-	glm::mat4 cursorPos = glm::translate(glm::mat4(1.0f), this->mousePositionUnit);
-	this->shader_withTextures->SetMat4("cursorOffsetMatrix", cursorPos);
+	// Drawing the UI
+	this->shader_UI->Use();
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, this->cursorTextureId);
+	// Draw Cursor
+	this->modelMatrix = glm::translate(glm::mat4(1.0f), this->mousePositionUnit);
+	this->shader_UI->SetMat4("modelMatrix", this->modelMatrix);
+	this->cursorTexture->Activate();
+	this->cursorTexture->Bind();
 	this->vaoCursor->Bind();
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -331,17 +325,20 @@ void Game::UpdatePerformanceData(){
 }
 
 void Game::Quit(){
-	shader_noTextures->Delete();
-	shader_withTextures->Delete();
-	vaoPlayer->Delete();
-	vboPlayer->Delete();
-	iboPlayer->Delete();
-	vaoMap->Delete();
-	vboMap->Delete();
-	iboMap->Delete();
-	vaoCursor->Delete();
-	vboCursor->Delete();
-	iboCursor->Delete();
+	this->cursorTexture->Delete();
+	this->mapTexture->Delete();
+	this->playerTexture->Delete();
+	this->shader_withTextures->Delete();
+	this->shader_UI->Delete();
+	this->vaoPlayer->Delete();
+	this->vboPlayer->Delete();
+	this->iboPlayer->Delete();
+	this->vaoMap->Delete();
+	this->vboMap->Delete();
+	this->iboMap->Delete();
+	this->vaoCursor->Delete();
+	this->vboCursor->Delete();
+	this->iboCursor->Delete();
 	SDL_GL_DeleteContext(this->context);
 	SDL_DestroyWindow(this->window);
 	SDL_Quit();

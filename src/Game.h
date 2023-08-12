@@ -16,6 +16,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "main.h"
+#include "Texture.h"
 
 class Game{
 	
@@ -46,7 +47,7 @@ public:
 	b8 				isValid							= false;
 	
 	//opengl stuff
-	Shader* 		shader_noTextures				= nullptr;
+	Shader* 		shader_UI						= nullptr;
 	Shader* 		shader_withTextures				= nullptr;
 	VertexArray* 	vaoPlayer						= nullptr;
 	VertexBuffer* 	vboPlayer						= nullptr;
@@ -95,7 +96,9 @@ public:
 	Camera camera;
 
 	// textures stuff
-	u32 cursorTextureId;
+	Texture* cursorTexture 							= nullptr;
+	Texture* playerTexture 							= nullptr;
+	Texture* mapTexture 							= nullptr;
 
 private:
 	void PrintMouseClickPosition();
