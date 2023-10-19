@@ -261,7 +261,6 @@ void Game::SimulateWorld(){
 																		  glm::vec3(this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z));
 
 		this->locationPlayerHasToGo = glm::vec3(rayMapTopSurfaceCollision.x, rayMapTopSurfaceCollision.y + 0.5f*this->playerDimension_f.y, rayMapTopSurfaceCollision.z);
-		this->PrintLocationPlayerHasToGo();
 		this->playerVelocity_f = glm::normalize(this->locationPlayerHasToGo - this->playerPosition_f);
 		this->playerIsMoving = true;
 		this->playerHasClicked = false;
@@ -369,7 +368,7 @@ void Game::PrintPlayerVelocity(){
 }
 
 void Game::PrintLocationPlayerHasToGo(){
-	std::cout << "Location Player has to go = (" << this->locationPlayerHasToGo.x << ", " << this->locationPlayerHasToGo.y << ", " << this->locationPlayerHasToGo.z << std::endl;
+	std::cout << "Location Player has to go = (" << this->locationPlayerHasToGo.x << ", " << this->locationPlayerHasToGo.y << ", " << this->locationPlayerHasToGo.z << ")" << std::endl;
 }
 
 void Game::PrintDeltaTime(){
