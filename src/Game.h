@@ -86,7 +86,7 @@ public:
 	b8  			playerStartedMoving				= false;
 	b8  			playerIsMoving					= false;
 	b8 				playerHasClicked 				= false;
-	f32 			distanceForPlayerToStopMoving	= 0.005f;
+	f32 			distanceForPlayerToStopMoving	= 0.01f;
 
 	//map parameters
 	glm::vec3 		mapPosition_f					= glm::vec3(0.0f);
@@ -109,4 +109,5 @@ private:
 	void PrintPlayerVelocity();
 	void PrintLocationPlayerHasToGo();
 	void PrintDeltaTime();
+	bool IsOutOfMapBounds(glm::vec3 pos);
 };

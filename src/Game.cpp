@@ -177,8 +177,8 @@ void Game::HandleInput(){
 	SDL_Event e;
 	while(SDL_PollEvent(&e)){
 		// keyboard stuff
-		const u8* keyboardState 				= SDL_GetKeyboardState(NULL);
-		this->isRunning 						= !keyboardState[SDL_SCANCODE_ESCAPE];
+		const u8* keyboardState = SDL_GetKeyboardState(NULL);
+		this->isRunning = !keyboardState[SDL_SCANCODE_ESCAPE];
 
 		// mouse
 		if(e.type == SDL_MOUSEBUTTONDOWN){
@@ -258,7 +258,7 @@ void Game::SimulateWorld(){
 														this->camera.position_f.z + rayWorld.z * ((this->randomPointFromMapTopSurface_f.y - this->camera.position_f.y) / rayWorld.y));
 		
 		rayMapTopSurfaceCollision = glm::clamp(rayMapTopSurfaceCollision, glm::vec3(this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z),
-																		  glm::vec3(this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z));
+																		  glm::vec3(this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z));		
 
 		this->locationPlayerHasToGo = glm::vec3(rayMapTopSurfaceCollision.x, rayMapTopSurfaceCollision.y + 0.5f*this->playerDimension_f.y, rayMapTopSurfaceCollision.z);
 		this->playerVelocity_f = glm::normalize(this->locationPlayerHasToGo - this->playerPosition_f);
@@ -267,12 +267,12 @@ void Game::SimulateWorld(){
 	}
 
 	if(this->playerIsMoving){
-		this->playerPosition_f += this->playerVelocity_f * this->playerMaximumSpeed * this->performanceData.deltaTimeInSeconds;
 		f32 distanceBetweenDestinationAndPlayer = glm::distance(this->locationPlayerHasToGo, this->playerPosition_f);
-		if(distanceBetweenDestinationAndPlayer <= distanceForPlayerToStopMoving){
+		if(distanceBetweenDestinationAndPlayer <= this->distanceForPlayerToStopMoving || this->IsOutOfMapBounds(this->playerPosition_f)){
 			this->playerVelocity_f = glm::vec3(0.0f);
 			this->playerIsMoving = false;
 		}
+		this->playerPosition_f += this->playerVelocity_f * this->playerMaximumSpeed * this->performanceData.deltaTimeInSeconds;
 	}
 }
 
@@ -373,4 +373,13 @@ void Game::PrintLocationPlayerHasToGo(){
 
 void Game::PrintDeltaTime(){
 	std::cout << "Delta Time: " << this->performanceData.deltaTimeInSeconds << std::endl;
+}
+
+bool Game::IsOutOfMapBounds(glm::vec3 pos){
+	f32 leftBound = mapPosition_f.x - 0.5f*mapDimension_f.x;
+	f32 rightBound = mapPosition_f.x + 0.5f*mapDimension_f.x;
+	f32 farBound = mapPosition_f.z + 0.5f*mapDimension_f.z;
+	f32 nearBound = mapPosition_f.z - 0.5f*mapDimension_f.z;
+	if(pos.x <= leftBound || pos.x >= rightBound || pos.z <= nearBound || pos.z >= farBound) return true;
+	return false;
 }
