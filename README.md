@@ -13,7 +13,7 @@ Open command prompt and enter this command: <code>make run</code>
 - SDL2	 			(For windowing, input, audio)
 - stb_image.h 		(For image/texture/icon loading)
 - GLM				(Math Library)
-- Sublime Text 3	(Using these plugins: [GLSL Syntax Highlighting](https://github.com/euler0/sublime-glsl) and [Terminus Terminal Emulator](https://packagecontrol.io/packages/Terminus))
+- Sublime Text 3	(Using these plugins: [GLSL Syntax Highlighting](https://github.com/euler0/sublime-glsl))
 - Makefiles 		(For compiling and linking)
 - GDB 				(Debugging, with some printf/cout debugging too just to annoy modern programmers)
 - RenderDoc 		(Debugging also)
