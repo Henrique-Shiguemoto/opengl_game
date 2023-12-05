@@ -9,10 +9,6 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	this->windowHeight = windowHeight;
 	this->windowAspectRatio = (f32)this->windowWidth / (f32)this->windowHeight;
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-
 	if(SDL_Init(SDL_INIT_VIDEO)){
 		std::cout << "SDL2 Couldn't Initialize!\n" << std::endl;
 		this->isValid = false;
@@ -26,8 +22,27 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 		return;
 	}
 
-	// SDL_ShowCursor(SDL_DISABLE);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	// I'm currently using RenderDoc for graphics debugging and it is important that the code is in this order to avoid errors in RenderDoc, 
+	// 		SDL_Init => SDL_CreateWindow => SDL_GL_SetAttribute => SDL_GL_CreateContext.
+	// If it's not in this order, RenderDoc will show an error (at least on my machine) along the lines of "Context not created by CreateContextAttribs. Captures Disabled."
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
+	this->context = SDL_GL_CreateContext(this->window);
+	if(!this->context){
+		std::cout << "Couldn't create OpenGL context!\n" << std::endl;
+		this->isValid = false;
+		return;
+	}
+
+	if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)){
+		std::cout << "Couldn't initialize GLAD and load OpenGL function pointers!\n" << std::endl;
+		this->isValid = false;
+		return;
+	}
+
+	SDL_SetRelativeMouseMode(SDL_TRUE); // this hides the mouse cursor and confines it to the window
 	SDL_WarpMouseInWindow(this->window, this->windowWidth / 2, this->windowHeight / 2); // fix the mouse in the middle of the screen always
 	stbi_set_flip_vertically_on_load(true);
 
@@ -52,19 +67,6 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	SDL_SetWindowIcon(this->window, iconSurface);
 	SDL_FreeSurface(iconSurface);
 	stbi_image_free(iconPixels);
-
-	this->context = SDL_GL_CreateContext(this->window);
-	if(!this->context){
-		std::cout << "Couldn't create OpenGL context!\n" << std::endl;
-		this->isValid = false;
-		return;
-	}
-
-	if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)){
-		std::cout << "Couldn't initialize GLAD and load OpenGL function pointers!\n" << std::endl;
-		this->isValid = false;
-		return;
-	}
 
 	// cursor texture
 	this->cursorTexture = new Texture("assets/cursor.png", GL_NEAREST, GL_RGBA, GL_TEXTURE0, true);
@@ -277,7 +279,7 @@ void Game::SimulateWorld(){
 }
 
 void Game::RenderGraphics(){
-	glClearColor(0.4f, 0.2f, 0.5f, 1.0f);
+	glClearColor(1.0f, 0.5f, 0.31f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Drawing the objects

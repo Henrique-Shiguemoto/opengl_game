@@ -1,7 +1,7 @@
 #include "Game.h"
 
 i32 main(){
-	Game game("OpenGL Game", 800, 600, false);
+	Game game("OpenGL Game", WINDOW_WIDTH, WINDOW_HEIGHT, true);
 	if(!game.isValid) return 1;
 
 	while(game.isRunning){

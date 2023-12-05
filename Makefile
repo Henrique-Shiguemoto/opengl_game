@@ -19,11 +19,11 @@ link:
 	$(COMPILER) $(OBJS) -o $(BIN) $(LIBRARY_PATH) $(LINKER_FLAGS)
 
 # run the executable
-run: clean all
+run:
 	$(BIN)
 
 # call debugger on the executable
-debug: clean all
+debug:
 	$(DEBUGGER) $(BIN)
 
 # clear unnecessary files

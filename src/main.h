@@ -14,8 +14,8 @@ typedef unsigned int u32;
 typedef unsigned long long u64;
 
 #define GAME_NAME 				"OpenGL Game"
-#define WINDOW_WIDTH 			800
-#define WINDOW_HEIGHT 			600
+#define WINDOW_WIDTH 			840
+#define WINDOW_HEIGHT 			640
 #define ASPECT_RATIO 			((f32)WINDOW_WIDTH / (f32)WINDOW_HEIGHT)
 
 struct PerformanceData{
@@ -23,10 +23,3 @@ struct PerformanceData{
 	f32 lastTimeInSeconds			= 0;
 	f32 deltaTimeInSeconds			= 0.0f;
 };
-
-b8 Init();
-void HandleInput();
-void SimulateWorld();
-void RenderGraphics();
-void UpdateFrametimeInWindowTitle(PerformanceData& perfData);
-void Quit();
