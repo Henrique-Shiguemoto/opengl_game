@@ -16,6 +16,7 @@ Open command prompt and enter this command: <code>make run</code>
 - Sublime Text 3	(Using these plugins: [GLSL Syntax Highlighting](https://github.com/euler0/sublime-glsl) and [Terminus Terminal Emulator](https://packagecontrol.io/packages/Terminus))
 - Makefiles 		(For compiling and linking)
 - GDB 				(Debugging, with some printf/cout debugging too just to annoy modern programmers)
+- RenderDoc 		(Debugging also)
 
 # Screenshots
 
