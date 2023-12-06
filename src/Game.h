@@ -58,6 +58,7 @@ public:
 	VertexArray* 	vaoCursor						= nullptr;
 	VertexBuffer* 	vboCursor						= nullptr;
 	IndexBuffer* 	iboCursor						= nullptr;
+	VertexArray* 	vaoLight						= nullptr;
 
 	//rendering matrices
 	glm::mat4 modelMatrix 							= glm::mat4(1.0f);
@@ -99,6 +100,9 @@ public:
 	Texture* cursorTexture 							= nullptr;
 	Texture* playerTexture 							= nullptr;
 	Texture* mapTexture 							= nullptr;
+
+	glm::vec3 		lightPos 						= playerPosition_f + glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 		lightColor 						= glm::vec3(1.0f, 1.0f, 1.0f);
 
 private:
 	void PrintMouseClickPosition();

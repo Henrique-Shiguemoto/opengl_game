@@ -68,7 +68,6 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	SDL_FreeSurface(iconSurface);
 	stbi_image_free(iconPixels);
 
-	// cursor texture
 	this->cursorTexture = new Texture("assets/cursor.png", GL_NEAREST, GL_RGBA, GL_TEXTURE0, true);
 	this->playerTexture = new Texture("assets/spaceship.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
 	this->mapTexture 	= new Texture("assets/map_moba.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
@@ -79,58 +78,140 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	this->shader_withTextures = new Shader("shaders/shader_withTextures.vs", "shaders/shader_withTextures.fs");
 	this->shader_UI = new Shader("shaders/shader_UI.vs", "shaders/shader_UI.fs");
 
+	// MAP CORNERS (Left, Right, Botton, Top, Near, Far)
+	#define LBN_MAP this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z
+	#define LTN_MAP this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z
+	#define LTF_MAP this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z
+	#define LBF_MAP this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z
+	#define RBN_MAP this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z
+	#define RTN_MAP this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z
+	#define RTF_MAP this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z
+	#define RBF_MAP this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z
+
+	#define L_NORMAL -1.0f,  0.0f,  0.0f
+	#define R_NORMAL  1.0f,  0.0f,  0.0f
+	#define N_NORMAL  0.0f,  0.0f,  1.0f
+	#define F_NORMAL  0.0f,  0.0f, -1.0f
+	#define T_NORMAL  0.0f,  1.0f,  0.0f
+	#define B_NORMAL  0.0f, -1.0f,  0.0f
+
 	f32 mapVertices[] = {
-		//position + colors
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //left-bottom-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //left-top-near
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 1.0f, //left-top-far
-		this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //left-bottom-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 0.0f, 0.0f, //right-bottom-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z, 1.0f, 0.0f, //right-top-near
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y + 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 1.0f, 1.0f, //right-top-far
-		this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, this->mapPosition_f.y - 0.5f*this->mapDimension_f.y, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z, 0.0f, 0.0f  //right-bottom-far
+		//position + texture coordinates + normals
+		LBN_MAP, 0.0f, 0.0f, L_NORMAL,
+		LTN_MAP, 0.0f, 0.0f, L_NORMAL,
+		LTF_MAP, 0.0f, 0.0f, L_NORMAL,
+		LTF_MAP, 0.0f, 0.0f, L_NORMAL,
+		LBN_MAP, 0.0f, 0.0f, L_NORMAL,
+		LBF_MAP, 0.0f, 0.0f, L_NORMAL,
+		LTF_MAP, 0.0f, 0.0f, F_NORMAL,
+		LBF_MAP, 0.0f, 0.0f, F_NORMAL,
+		RBF_MAP, 0.0f, 0.0f, F_NORMAL,
+		LTF_MAP, 0.0f, 0.0f, F_NORMAL,
+		RBF_MAP, 0.0f, 0.0f, F_NORMAL,
+		RTF_MAP, 0.0f, 0.0f, F_NORMAL,
+		RTF_MAP, 0.0f, 0.0f, R_NORMAL,
+		RBF_MAP, 0.0f, 0.0f, R_NORMAL,
+		RTN_MAP, 0.0f, 0.0f, R_NORMAL,
+		RTN_MAP, 0.0f, 0.0f, R_NORMAL,
+		RBF_MAP, 0.0f, 0.0f, R_NORMAL,
+		RBN_MAP, 0.0f, 0.0f, R_NORMAL,
+		RBN_MAP, 0.0f, 0.0f, N_NORMAL,
+		RTN_MAP, 0.0f, 0.0f, N_NORMAL,
+		LTN_MAP, 0.0f, 0.0f, N_NORMAL,
+		LTN_MAP, 0.0f, 0.0f, N_NORMAL,
+		RBN_MAP, 0.0f, 0.0f, N_NORMAL,
+		LBN_MAP, 0.0f, 0.0f, N_NORMAL,
+		RBN_MAP, 0.0f, 0.0f, B_NORMAL,
+		LBN_MAP, 0.0f, 0.0f, B_NORMAL,
+		LBF_MAP, 0.0f, 0.0f, B_NORMAL,
+		RBN_MAP, 0.0f, 0.0f, B_NORMAL,
+		LBF_MAP, 0.0f, 0.0f, B_NORMAL,
+		RBF_MAP, 0.0f, 0.0f, B_NORMAL,
+		LTN_MAP, 0.0f, 0.0f, T_NORMAL,
+		LTF_MAP, 0.0f, 1.0f, T_NORMAL,
+		RTN_MAP, 1.0f, 0.0f, T_NORMAL,
+		LTF_MAP, 0.0f, 1.0f, T_NORMAL,
+		RTN_MAP, 1.0f, 0.0f, T_NORMAL,
+		RTF_MAP, 1.0f, 1.0f, T_NORMAL
 	};
 
 	u32 mapIndices[] = {
 		0, 1, 2,
-		0, 2, 3,
-		2, 3, 7,
-		2, 7, 6,
-		7, 6, 5,
-		7, 5, 4,
-		0, 5, 4,
-		0, 1, 5,
-		1, 2, 5,
-		2, 5, 6,
-		0, 3, 4,
-		3, 4, 7
+		3, 4, 5,
+		6, 7, 8,
+		9, 10, 11,
+		12, 13, 14,
+		15, 16, 17,
+		18, 19, 20,
+		21, 22, 23,
+		24, 25, 26,
+		27, 28, 29,
+		30, 31, 32, 
+		33, 34, 35
 	};
 
+	#define LBN_PLAYER -0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z
+	#define LTN_PLAYER -0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z
+	#define LTF_PLAYER -0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z
+	#define LBF_PLAYER -0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z
+	#define RBN_PLAYER +0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z
+	#define RTN_PLAYER +0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z
+	#define RTF_PLAYER +0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z
+	#define RBF_PLAYER +0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z
+
 	f32 playerVertices[] = {
-		//position + colors
-		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //left-bottom-near
-		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //left-top-near
-		-0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 1.0f, //left-top-far
-		-0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //left-bottom-far
-		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 0.0f, 0.0f, //right-bottom-near
-		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, +0.5f*this->playerDimension_f.z, 1.0f, 0.0f, //right-top-near
-		+0.5f*this->playerDimension_f.x, +0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 1.0f, 1.0f, //right-top-far
-		+0.5f*this->playerDimension_f.x, -0.5f*this->playerDimension_f.y, -0.5f*this->playerDimension_f.z, 0.0f, 0.0f  //right-bottom-far
+		//position + colors + normals
+		LBN_PLAYER, 0.0f, 0.0f, L_NORMAL,
+		LTN_PLAYER, 0.0f, 0.0f, L_NORMAL,
+		LTF_PLAYER, 0.0f, 0.0f, L_NORMAL,
+		LTF_PLAYER, 0.0f, 0.0f, L_NORMAL,
+		LBN_PLAYER, 0.0f, 0.0f, L_NORMAL,
+		LBF_PLAYER, 0.0f, 0.0f, L_NORMAL,
+		LTF_PLAYER, 0.0f, 0.0f, F_NORMAL,
+		LBF_PLAYER, 0.0f, 0.0f, F_NORMAL,
+		RBF_PLAYER, 0.0f, 0.0f, F_NORMAL,
+		LTF_PLAYER, 0.0f, 0.0f, F_NORMAL,
+		RBF_PLAYER, 0.0f, 0.0f, F_NORMAL,
+		RTF_PLAYER, 0.0f, 0.0f, F_NORMAL,
+		RTF_PLAYER, 0.0f, 0.0f, R_NORMAL,
+		RBF_PLAYER, 0.0f, 0.0f, R_NORMAL,
+		RTN_PLAYER, 0.0f, 0.0f, R_NORMAL,
+		RTN_PLAYER, 0.0f, 0.0f, R_NORMAL,
+		RBF_PLAYER, 0.0f, 0.0f, R_NORMAL,
+		RBN_PLAYER, 0.0f, 0.0f, R_NORMAL,
+		RBN_PLAYER, 0.0f, 0.0f, N_NORMAL,
+		RTN_PLAYER, 0.0f, 0.0f, N_NORMAL,
+		LTN_PLAYER, 0.0f, 0.0f, N_NORMAL,
+		LTN_PLAYER, 0.0f, 0.0f, N_NORMAL,
+		RBN_PLAYER, 0.0f, 0.0f, N_NORMAL,
+		LBN_PLAYER, 0.0f, 0.0f, N_NORMAL,
+		RBN_PLAYER, 0.0f, 0.0f, B_NORMAL,
+		LBN_PLAYER, 0.0f, 0.0f, B_NORMAL,
+		LBF_PLAYER, 0.0f, 0.0f, B_NORMAL,
+		RBN_PLAYER, 0.0f, 0.0f, B_NORMAL,
+		LBF_PLAYER, 0.0f, 0.0f, B_NORMAL,
+		RBF_PLAYER, 0.0f, 0.0f, B_NORMAL,
+		LTN_PLAYER, 0.0f, 0.0f, T_NORMAL,
+		LTF_PLAYER, 0.0f, 1.0f, T_NORMAL,
+		RTN_PLAYER, 1.0f, 0.0f, T_NORMAL,
+		LTF_PLAYER, 0.0f, 1.0f, T_NORMAL,
+		RTN_PLAYER, 1.0f, 0.0f, T_NORMAL,
+		RTF_PLAYER, 1.0f, 1.0f, T_NORMAL
 	};
 
 	u32 playerIndices[] = {
 		0, 1, 2,
-		0, 2, 3,
-		2, 3, 7,
-		2, 7, 6,
-		7, 6, 5,
-		7, 5, 4,
-		0, 5, 4,
-		0, 1, 5,
-		1, 2, 5,
-		2, 5, 6,
-		0, 3, 4,
-		3, 4, 7
+		3, 4, 5,
+		6, 7, 8,
+		9, 10, 11,
+		12, 13, 14,
+		15, 16, 17,
+		18, 19, 20,
+		21, 22, 23,
+		24, 25, 26,
+		27, 28, 29,
+		30, 31, 32, 
+		33, 34, 35
 	};
 
 	f32 cursorVertices[] = {
@@ -150,15 +231,17 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	this->vaoPlayer->Bind();
 	this->vboPlayer = new VertexBuffer(playerVertices, sizeof(playerVertices));
 	this->iboPlayer = new IndexBuffer(playerIndices, sizeof(playerIndices));
-	this->vaoPlayer->DefineVBOLayout(vboPlayer, 0, 3, 20, 0);
-	this->vaoPlayer->DefineVBOLayout(vboPlayer, 1, 2, 20, 3);
-	
+	this->vaoPlayer->DefineVBOLayout(vboPlayer, 0, 3, 32, 0);
+	this->vaoPlayer->DefineVBOLayout(vboPlayer, 1, 2, 32, 3);
+	this->vaoPlayer->DefineVBOLayout(vboPlayer, 2, 3, 32, 5);
+
 	this->vaoMap = new VertexArray();
 	this->vaoMap->Bind();
 	this->vboMap = new VertexBuffer(mapVertices, sizeof(mapVertices));
 	this->iboMap = new IndexBuffer(mapIndices, sizeof(mapIndices));
-	this->vaoMap->DefineVBOLayout(vboMap, 0, 3, 20, 0);
-	this->vaoMap->DefineVBOLayout(vboMap, 1, 2, 20, 3);
+	this->vaoMap->DefineVBOLayout(vboMap, 0, 3, 32, 0);
+	this->vaoMap->DefineVBOLayout(vboMap, 1, 2, 32, 3);
+	this->vaoMap->DefineVBOLayout(vboMap, 2, 3, 32, 5);
 
 	this->vaoCursor = new VertexArray();
 	this->vaoCursor->Bind();
@@ -279,7 +362,7 @@ void Game::SimulateWorld(){
 }
 
 void Game::RenderGraphics(){
-	glClearColor(1.0f, 0.5f, 0.31f, 1.0f);
+	glClearColor(0.561f, 0.224f, 0.639f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Drawing the objects
@@ -294,6 +377,9 @@ void Game::RenderGraphics(){
 	this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
 	this->shader_withTextures->SetMat4("viewMatrix", this->viewMatrix);
 	this->shader_withTextures->SetMat4("projectionMatrix", this->projectionMatrix);
+	this->shader_withTextures->SetVec3("lightColor", this->lightColor);
+	this->shader_withTextures->SetVec3("lightPos", this->lightPos);
+
 	this->vaoMap->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 

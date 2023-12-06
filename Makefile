@@ -28,4 +28,4 @@ debug:
 
 # clear unnecessary files
 clean:
-	del *.o *.exe *.s src\*.o src\*.exe src\*.s
+	del *.o *.exe *.s *.trace src\*.o src\*.exe src\*.s src\*.trace
