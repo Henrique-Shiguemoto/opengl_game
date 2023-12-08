@@ -15,7 +15,7 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 		return;
 	}
 
-	this->window = SDL_CreateWindow(this->windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+	this->window = SDL_CreateWindow(this->windowTitle.c_str(), 530, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
 	if(!this->window){
 		std::cout << "Couldn't create the window!\n" << std::endl;
 		this->isValid = false;
@@ -341,9 +341,9 @@ void Game::SimulateWorld(){
 		glm::vec3 rayMapTopSurfaceCollision = glm::vec3(this->camera.position_f.x + rayWorld.x * ((this->randomPointFromMapTopSurface_f.y - this->camera.position_f.y) / rayWorld.y),
 														this->randomPointFromMapTopSurface_f.y,
 														this->camera.position_f.z + rayWorld.z * ((this->randomPointFromMapTopSurface_f.y - this->camera.position_f.y) / rayWorld.y));
-		
+
 		rayMapTopSurfaceCollision = glm::clamp(rayMapTopSurfaceCollision, glm::vec3(this->mapPosition_f.x - 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z - 0.5f*this->mapDimension_f.z),
-																		  glm::vec3(this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z));		
+																		  glm::vec3(this->mapPosition_f.x + 0.5f*this->mapDimension_f.x, 0.5f, this->mapPosition_f.z + 0.5f*this->mapDimension_f.z));
 
 		this->locationPlayerHasToGo = glm::vec3(rayMapTopSurfaceCollision.x, rayMapTopSurfaceCollision.y + 0.5f*this->playerDimension_f.y, rayMapTopSurfaceCollision.z);
 		this->playerVelocity_f = glm::normalize(this->locationPlayerHasToGo - this->playerPosition_f);
@@ -353,7 +353,7 @@ void Game::SimulateWorld(){
 
 	if(this->playerIsMoving){
 		f32 distanceBetweenDestinationAndPlayer = glm::distance(this->locationPlayerHasToGo, this->playerPosition_f);
-		if(distanceBetweenDestinationAndPlayer <= this->distanceForPlayerToStopMoving || this->IsOutOfMapBounds(this->playerPosition_f)){
+		if(distanceBetweenDestinationAndPlayer <= this->distanceForPlayerToStopMoving){
 			this->playerVelocity_f = glm::vec3(0.0f);
 			this->playerIsMoving = false;
 		}
@@ -468,6 +468,6 @@ bool Game::IsOutOfMapBounds(glm::vec3 pos){
 	f32 rightBound = mapPosition_f.x + 0.5f*mapDimension_f.x;
 	f32 farBound = mapPosition_f.z + 0.5f*mapDimension_f.z;
 	f32 nearBound = mapPosition_f.z - 0.5f*mapDimension_f.z;
-	if(pos.x <= leftBound || pos.x >= rightBound || pos.z <= nearBound || pos.z >= farBound) return true;
+	if((pos.x < leftBound) || (pos.x > rightBound) || (pos.z < nearBound) || (pos.z > farBound)) return true;
 	return false;
 }
