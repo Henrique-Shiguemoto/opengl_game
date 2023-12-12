@@ -17,6 +17,7 @@
 #include "Camera.h"
 #include "main.h"
 #include "Texture.h"
+#include "Light.h"
 
 class Game{
 	
@@ -97,12 +98,12 @@ public:
 	Camera camera;
 
 	// textures stuff
-	Texture* cursorTexture 							= nullptr;
-	Texture* playerTexture 							= nullptr;
-	Texture* mapTexture 							= nullptr;
+	Texture* 		cursorTexture 					= nullptr;
+	Texture* 		playerTexture 					= nullptr;
+	Texture* 		mapTexture 						= nullptr;
 
-	glm::vec3 		lightPos 						= playerPosition_f + glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 		lightColor 						= glm::vec3(1.0f, 1.0f, 1.0f);
+	// Lights
+	Light light;
 
 private:
 	void PrintMouseClickPosition();

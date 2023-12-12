@@ -250,6 +250,8 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	this->vaoCursor->DefineVBOLayout(vboCursor, 0, 3, 20, 0);
 	this->vaoCursor->DefineVBOLayout(vboCursor, 1, 2, 20, 3);
 
+	this->light.lightPos += this->playerPosition_f;
+
 	this->isValid = true;
 	this->isRunning = true;
 	this->isFullscreen = fullscreen;
@@ -264,6 +266,13 @@ void Game::HandleInput(){
 		// keyboard stuff
 		const u8* keyboardState = SDL_GetKeyboardState(NULL);
 		this->isRunning = !keyboardState[SDL_SCANCODE_ESCAPE];
+
+		this->light.lightHasToMoveForward 	= keyboardState[SDL_SCANCODE_W];
+		this->light.lightHasToMoveBack 		= keyboardState[SDL_SCANCODE_S];
+		this->light.lightHasToMoveLeft 		= keyboardState[SDL_SCANCODE_A];
+		this->light.lightHasToMoveRight 	= keyboardState[SDL_SCANCODE_D];
+		this->light.lightHasToMoveUp 		= keyboardState[SDL_SCANCODE_UP];
+		this->light.lightHasToMoveDown 		= keyboardState[SDL_SCANCODE_DOWN];
 
 		// mouse
 		if(e.type == SDL_MOUSEBUTTONDOWN){
@@ -315,10 +324,19 @@ void Game::HandleInput(){
 }
 
 void Game::SimulateWorld(){
+
+	float lightSpeed = 200.0f;
 	if(this->camera.hasToMoveUp)	this->camera.position_f += this->camera.up_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
 	if(this->camera.hasToMoveDown)	this->camera.position_f -= this->camera.up_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
 	if(this->camera.hasToMoveRight)	this->camera.position_f += this->camera.right_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
 	if(this->camera.hasToMoveLeft)	this->camera.position_f -= this->camera.right_f * this->camera.maximumSpeed * this->performanceData.deltaTimeInSeconds;
+
+	if(this->light.lightHasToMoveForward) 	this->light.lightPos.z -= 0.01f * lightSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->light.lightHasToMoveBack) 		this->light.lightPos.z += 0.01f * lightSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->light.lightHasToMoveLeft) 		this->light.lightPos.x -= 0.01f * lightSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->light.lightHasToMoveRight) 	this->light.lightPos.x += 0.01f * lightSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->light.lightHasToMoveUp) 		this->light.lightPos.y += 0.01f * lightSpeed * this->performanceData.deltaTimeInSeconds;
+	if(this->light.lightHasToMoveDown) 		this->light.lightPos.y -= 0.01f * lightSpeed * this->performanceData.deltaTimeInSeconds;
 
 	if(this->playerHasClicked){
 		// Mouse raycast
@@ -377,8 +395,9 @@ void Game::RenderGraphics(){
 	this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
 	this->shader_withTextures->SetMat4("viewMatrix", this->viewMatrix);
 	this->shader_withTextures->SetMat4("projectionMatrix", this->projectionMatrix);
-	this->shader_withTextures->SetVec3("lightColor", this->lightColor);
-	this->shader_withTextures->SetVec3("lightPos", this->lightPos);
+	this->shader_withTextures->SetVec3("lightColor", this->light.lightColor);
+	this->shader_withTextures->SetVec3("lightPos", this->light.lightPos);
+	this->shader_withTextures->SetVec3("cameraPos", this->camera.position_f);
 
 	this->vaoMap->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
