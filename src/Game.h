@@ -18,6 +18,7 @@
 #include "main.h"
 #include "Texture.h"
 #include "Light.h"
+#include "Material.h"
 
 class Game{
 	
@@ -47,9 +48,10 @@ public:
 	b8 				isVSyncEnabled					= true;
 	b8 				isValid							= false;
 	
-	//opengl stuff
+	//shaders, vaos, vbos, ebos
 	Shader* 		shader_UI						= nullptr;
 	Shader* 		shader_withTextures				= nullptr;
+	Shader* 		shader_light 					= nullptr;
 	VertexArray* 	vaoPlayer						= nullptr;
 	VertexBuffer* 	vboPlayer						= nullptr;
 	IndexBuffer* 	iboPlayer 						= nullptr;
@@ -59,7 +61,6 @@ public:
 	VertexArray* 	vaoCursor						= nullptr;
 	VertexBuffer* 	vboCursor						= nullptr;
 	IndexBuffer* 	iboCursor						= nullptr;
-	VertexArray* 	vaoLight						= nullptr;
 
 	//rendering matrices
 	glm::mat4 modelMatrix 							= glm::mat4(1.0f);
@@ -71,7 +72,7 @@ public:
 	glm::vec2 		lastMouseClickPositionUnit 		= glm::vec2(0.0f);
 	glm::ivec2 		mousePosition					= glm::ivec2(windowWidth / 2, windowHeight / 2);
 	glm::vec3 		mousePositionUnit				= glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::ivec2 		lastMousePosition				= glm::ivec2(0, 0);
+	glm::ivec2 		lastMousePosition				= glm::ivec2(windowWidth / 2, windowHeight / 2);
 	glm::ivec2 		mouseDimension					= glm::ivec2(32, 32); // in pixels
 	glm::vec2 		mouseDimensionUnit				= glm::vec2(32.0f / (f32)this->windowWidth, 32.0f / (f32)this->windowHeight);
 	f32 			mouseSensitivity 				= 0.1f;
@@ -104,6 +105,12 @@ public:
 
 	// Lights
 	Light light;
+	VertexArray* 	vaoLight 						= nullptr;
+	VertexBuffer* 	vboLight 						= nullptr;
+	IndexBuffer* 	iboLight 						= nullptr;
+
+	// Materials
+	Material material;
 
 private:
 	void PrintMouseClickPosition();
