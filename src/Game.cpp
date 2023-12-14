@@ -42,7 +42,30 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 		return;
 	}
 
-	SDL_SetRelativeMouseMode(SDL_TRUE); // this hides the mouse cursor and confines it to the window
+	// setting custom cursor
+	i32 cursorWidth, cursorHeight, cursorChannelCount;
+	u8* cursorPixels = stbi_load("assets/cursor.png", &cursorWidth, &cursorHeight, &cursorChannelCount, 0);
+	if(!cursorPixels){
+		std::cout << "Couldn't load cursor image" << std::endl;
+		this->isValid = false;
+		return;
+	}
+
+	SDL_Surface* cursorSurface = SDL_CreateRGBSurfaceFrom(cursorPixels,
+                                      cursorWidth,
+                                      cursorHeight,
+                                      32,
+                                      cursorWidth * 4,
+                                      0x000000FF,
+                                      0x0000FF00,
+                                      0x00FF0000,
+                                      0xFF000000);
+	SDL_Cursor *cursor = SDL_CreateColorCursor(cursorSurface, 4, 4);
+	SDL_SetCursor(cursor);
+	SDL_FreeSurface(cursorSurface);
+	stbi_image_free(cursorPixels);
+
+	// SDL_SetRelativeMouseMode(SDL_TRUE); // this hides the mouse cursor and confines it to the window
 	SDL_WarpMouseInWindow(this->window, this->windowWidth / 2, this->windowHeight / 2); // fix the mouse in the middle of the screen always
 	stbi_set_flip_vertically_on_load(true);
 
@@ -68,15 +91,15 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 	SDL_FreeSurface(iconSurface);
 	stbi_image_free(iconPixels);
 
-	this->cursorTexture = new Texture("assets/cursor.png", GL_NEAREST, GL_RGBA, GL_TEXTURE0, true);
 	this->playerTexture = new Texture("assets/container.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
+	this->playerSpecularTexture = new Texture("assets/container_specular.png", GL_LINEAR, GL_RGBA, GL_TEXTURE1, true);
 	this->mapTexture 	= new Texture("assets/map_moba.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
 
 	glEnable(GL_DEPTH_TEST);
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
 	this->shader_withTextures = new Shader("shaders/shader_withTextures.vs", "shaders/shader_withTextures.fs");
-	this->shader_UI = new Shader("shaders/shader_UI.vs", "shaders/shader_UI.fs");
+	this->shader_diffuse_specular = new Shader("shaders/shader_diffuse_specular.vs", "shaders/shader_diffuse_specular.fs");
 	this->shader_light = new Shader("shaders/shader_light.vs", "shaders/shader_light.fs");
 
 	// MAP CORNERS (Left, Right, Botton, Top, Near, Far)
@@ -343,6 +366,7 @@ void Game::HandleInput(){
 		b8 cameraControlWasToggled = keyboardState[SDL_SCANCODE_C];
 		if(cameraControlWasToggled && !cameraControlWasToggledLastFrame){
 			this->camera.toggleFPS = !this->camera.toggleFPS;
+			SDL_SetRelativeMouseMode((SDL_bool)this->camera.toggleFPS);
 		}
 
 		//Inthis engine, some controls are not allowed if you're not in an FPS camera (you can't control light movement for example)
@@ -511,22 +535,46 @@ void Game::RenderGraphics(){
 	this->shader_withTextures->SetFloat("material.shininess", this->material.shininess);
 
 	// Draw map
-	// this->mapTexture->Activate();
-	// this->mapTexture->Bind();
-	// this->modelMatrix = glm::mat4(1.0f);
+	this->mapTexture->Activate();
+	this->mapTexture->Bind();
+	this->modelMatrix = glm::mat4(1.0f);
 	this->viewMatrix = this->camera.GetViewMatrix();
 	this->projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
-	// this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
+	this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
 	this->shader_withTextures->SetMat4("viewMatrix", this->viewMatrix);
 	this->shader_withTextures->SetMat4("projectionMatrix", this->projectionMatrix);
-	// this->vaoMap->Bind();
-	// glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	this->vaoMap->Bind();
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	// Draw Player
+	this->shader_diffuse_specular->Use();
+
+	this->shader_diffuse_specular->SetVec3("lightPos", this->light.lightPos);
+	this->light.lightColor.r = 1.0f;
+	this->light.lightColor.g = 1.0f;
+	this->light.lightColor.b = 1.0f;
+	this->shader_diffuse_specular->SetVec3("light.ambient",  this->light.ambientColor);
+	this->shader_diffuse_specular->SetVec3("light.diffuse",  this->light.diffuseColor);
+	this->shader_diffuse_specular->SetVec3("light.specular", this->light.specularColor);
+
+	this->shader_withTextures->SetVec3("cameraPos", this->camera.position_f);
+	this->shader_withTextures->SetVec3("material.ambient", this->material.ambient);
+	this->shader_withTextures->SetInt("material.diffuse", this->material.diffuse);
+	this->shader_withTextures->SetVec3("material.specular", this->material.specular);
+	this->shader_withTextures->SetFloat("material.shininess", this->material.shininess);
+
+	this->shader_diffuse_specular->SetInt("material.diffuse", 0);
 	this->playerTexture->Activate();
 	this->playerTexture->Bind();
+	this->shader_diffuse_specular->SetInt("material.specular", 1);
+	this->playerSpecularTexture->Activate();
+	this->playerSpecularTexture->Bind();
 	this->modelMatrix = glm::translate(glm::mat4(1.0f), this->playerPosition_f);
-	this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
+	this->viewMatrix = this->camera.GetViewMatrix();
+	this->projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
+	this->shader_diffuse_specular->SetMat4("modelMatrix", this->modelMatrix);
+	this->shader_diffuse_specular->SetMat4("viewMatrix", this->viewMatrix);
+	this->shader_diffuse_specular->SetMat4("projectionMatrix", this->projectionMatrix);
 	this->vaoPlayer->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
@@ -539,19 +587,6 @@ void Game::RenderGraphics(){
 	this->vaoLight->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-	// Drawing the UI
-	this->shader_UI->Use();
-
-	// Draw Cursor
-	if(!this->camera.toggleFPS){
-		this->modelMatrix = glm::translate(glm::mat4(1.0f), this->mousePositionUnit);
-		this->shader_UI->SetMat4("modelMatrix", this->modelMatrix);
-		this->cursorTexture->Activate();
-		this->cursorTexture->Bind();
-		this->vaoCursor->Bind();
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	}
-
 	SDL_GL_SwapWindow(this->window);
 }
 
@@ -562,11 +597,11 @@ void Game::UpdatePerformanceData(){
 }
 
 void Game::Quit(){
-	this->cursorTexture->Delete();
+	// this->cursorTexture->Delete();
 	this->mapTexture->Delete();
 	this->playerTexture->Delete();
 	this->shader_withTextures->Delete();
-	this->shader_UI->Delete();
+	// this->shader_UI->Delete();
 	this->shader_light->Delete();
 	this->vaoLight->Delete();
 	this->vboLight->Delete();

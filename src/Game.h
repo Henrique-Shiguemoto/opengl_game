@@ -52,6 +52,7 @@ public:
 	Shader* 		shader_UI						= nullptr;
 	Shader* 		shader_withTextures				= nullptr;
 	Shader* 		shader_light 					= nullptr;
+	Shader* 		shader_diffuse_specular 		= nullptr;
 	VertexArray* 	vaoPlayer						= nullptr;
 	VertexBuffer* 	vboPlayer						= nullptr;
 	IndexBuffer* 	iboPlayer 						= nullptr;
@@ -101,6 +102,7 @@ public:
 	// textures stuff
 	Texture* 		cursorTexture 					= nullptr;
 	Texture* 		playerTexture 					= nullptr;
+	Texture*  		playerSpecularTexture  			= nullptr;
 	Texture* 		mapTexture 						= nullptr;
 
 	// Lights
