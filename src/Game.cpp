@@ -93,13 +93,16 @@ Game::Game(const char* name, i32 windowWidth, i32 windowHeight, b8 fullscreen){
 
 	this->playerTexture = new Texture("assets/container.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
 	this->playerSpecularTexture = new Texture("assets/container_specular.png", GL_LINEAR, GL_RGBA, GL_TEXTURE1, true);
-	this->mapTexture 	= new Texture("assets/map_moba.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);
+	this->emissionTexture 	= new Texture("assets/matrix.png", GL_LINEAR, GL_RGBA, GL_TEXTURE2, true);
+	this->mapTexture 	= new Texture("assets/map_moba.png", GL_LINEAR, GL_RGBA, GL_TEXTURE0, true);	
 
 	glEnable(GL_DEPTH_TEST);
 	SDL_GL_SetSwapInterval(1); //enable vsync
 	
 	this->shader_withTextures = new Shader("shaders/shader_withTextures.vs", "shaders/shader_withTextures.fs");
 	this->shader_diffuse_specular = new Shader("shaders/shader_diffuse_specular.vs", "shaders/shader_diffuse_specular.fs");
+	this->shader_emission = new Shader("shaders/shader_emission.vs", "shaders/shader_emission.fs");
+	this->shader_directional = new Shader("shaders/shader_directional.vs", "shaders/shader_directional.fs");
 	this->shader_light = new Shader("shaders/shader_light.vs", "shaders/shader_light.fs");
 
 	// MAP CORNERS (Left, Right, Botton, Top, Near, Far)
@@ -509,72 +512,68 @@ void Game::SimulateWorld(){
 }
 
 void Game::RenderGraphics(){
-	glClearColor(0.561f, 0.224f, 0.639f, 1.0f);
+	glClearColor(0.001f, 0.02f, 0.01f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Drawing the objects
-	this->shader_withTextures->Use();
+	// this->shader_withTextures->Use();
 
-	//lighting stuff
-	this->shader_withTextures->SetVec3("lightPos", this->light.lightPos);
-	this->light.lightColor.r = 1.0f;
-	this->light.lightColor.g = 1.0f;
-	this->light.lightColor.b = 1.0f;
-	this->shader_withTextures->SetVec3("light.ambient",  this->light.ambientColor);
-	this->shader_withTextures->SetVec3("light.diffuse",  this->light.diffuseColor);
-	this->shader_withTextures->SetVec3("light.specular", this->light.specularColor);
+	// //lighting stuff
+	// this->shader_withTextures->SetVec3("light.position", this->light.lightPos);
+	// this->shader_withTextures->SetVec3("light.ambient",  this->light.ambientColor);
+	// this->shader_withTextures->SetVec3("light.diffuse",  this->light.diffuseColor);
+	// this->shader_withTextures->SetVec3("light.specular", this->light.specularColor);
 
-	// material stuff
-	this->material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-	this->material.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	this->material.shininess = 0.4 * 128;
-	this->shader_withTextures->SetVec3("cameraPos", this->camera.position_f);
-	this->shader_withTextures->SetVec3("material.ambient", this->material.ambient);
-	this->shader_withTextures->SetInt("material.diffuse", this->material.diffuse);
-	this->shader_withTextures->SetVec3("material.specular", this->material.specular);
-	this->shader_withTextures->SetFloat("material.shininess", this->material.shininess);
+	// // material stuff
+	// this->material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+	// this->material.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	// this->material.shininess = 0.4 * 128;
+	// this->shader_withTextures->SetVec3("cameraPos", this->camera.position_f);
+	// this->shader_withTextures->SetVec3("material.ambient", this->material.ambient);
+	// this->shader_withTextures->SetInt("material.diffuse", this->material.diffuse);
+	// this->shader_withTextures->SetVec3("material.specular", this->material.specular);
+	// this->shader_withTextures->SetFloat("material.shininess", this->material.shininess);
 
-	// Draw map
-	this->mapTexture->Activate();
-	this->mapTexture->Bind();
-	this->modelMatrix = glm::mat4(1.0f);
-	this->viewMatrix = this->camera.GetViewMatrix();
-	this->projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
-	this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
-	this->shader_withTextures->SetMat4("viewMatrix", this->viewMatrix);
-	this->shader_withTextures->SetMat4("projectionMatrix", this->projectionMatrix);
-	this->vaoMap->Bind();
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	// //Draw map
+	// this->mapTexture->Activate();
+	// this->mapTexture->Bind();
+	// this->modelMatrix = glm::mat4(1.0f);
+	// this->viewMatrix = this->camera.GetViewMatrix();
+	// this->projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
+	// this->shader_withTextures->SetMat4("modelMatrix", this->modelMatrix);
+	// this->shader_withTextures->SetMat4("viewMatrix", this->viewMatrix);
+	// this->shader_withTextures->SetMat4("projectionMatrix", this->projectionMatrix);
+	// this->vaoMap->Bind();
+	// glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	// Draw Player
-	this->shader_diffuse_specular->Use();
+	this->shader_emission->Use();
 
-	this->shader_diffuse_specular->SetVec3("lightPos", this->light.lightPos);
-	this->light.lightColor.r = 1.0f;
-	this->light.lightColor.g = 1.0f;
-	this->light.lightColor.b = 1.0f;
-	this->shader_diffuse_specular->SetVec3("light.ambient",  this->light.ambientColor);
-	this->shader_diffuse_specular->SetVec3("light.diffuse",  this->light.diffuseColor);
-	this->shader_diffuse_specular->SetVec3("light.specular", this->light.specularColor);
+	this->shader_emission->SetVec3("light.position", this->light.lightPos);
+	this->shader_emission->SetVec3("light.ambient", this->light.ambientColor);
+	this->shader_emission->SetVec3("light.diffuse", this->light.diffuseColor);
+	this->shader_emission->SetVec3("light.specular", this->light.specularColor);
 
-	this->shader_withTextures->SetVec3("cameraPos", this->camera.position_f);
-	this->shader_withTextures->SetVec3("material.ambient", this->material.ambient);
-	this->shader_withTextures->SetInt("material.diffuse", this->material.diffuse);
-	this->shader_withTextures->SetVec3("material.specular", this->material.specular);
-	this->shader_withTextures->SetFloat("material.shininess", this->material.shininess);
+	this->shader_emission->SetVec3("cameraPos", this->camera.position_f);
+	this->shader_emission->SetFloat("material.shininess", this->material.shininess);
 
-	this->shader_diffuse_specular->SetInt("material.diffuse", 0);
+	this->shader_emission->SetFloat("time", SDL_GetTicks() * 0.003f);
+
+	this->shader_emission->SetInt("material.diffuse", 0);
 	this->playerTexture->Activate();
 	this->playerTexture->Bind();
-	this->shader_diffuse_specular->SetInt("material.specular", 1);
+	this->shader_emission->SetInt("material.specular", 1);
 	this->playerSpecularTexture->Activate();
 	this->playerSpecularTexture->Bind();
+	this->shader_emission->SetInt("material.emission", 2);
+	this->emissionTexture->Activate();
+	this->emissionTexture->Bind();
 	this->modelMatrix = glm::translate(glm::mat4(1.0f), this->playerPosition_f);
 	this->viewMatrix = this->camera.GetViewMatrix();
 	this->projectionMatrix = glm::perspective(glm::radians(this->camera.fovDegrees), this->windowAspectRatio, this->camera.nearClipDistance, this->camera.farClipDistance);
-	this->shader_diffuse_specular->SetMat4("modelMatrix", this->modelMatrix);
-	this->shader_diffuse_specular->SetMat4("viewMatrix", this->viewMatrix);
-	this->shader_diffuse_specular->SetMat4("projectionMatrix", this->projectionMatrix);
+	this->shader_emission->SetMat4("modelMatrix", this->modelMatrix);
+	this->shader_emission->SetMat4("viewMatrix", this->viewMatrix);
+	this->shader_emission->SetMat4("projectionMatrix", this->projectionMatrix);
 	this->vaoPlayer->Bind();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 

@@ -2,8 +2,8 @@
 
 out vec4 outputColor;
 
-in vec2 textureCoord;
 in vec3 outNormals;
+in vec2 textureCoord;
 in vec3 fragPos;
 
 struct Material {
@@ -14,7 +14,7 @@ struct Material {
 uniform Material material;
 
 struct Light {
-	vec3 position;
+	vec3 direction;
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -23,15 +23,17 @@ uniform Light light;
 
 uniform vec3 cameraPos;
 
+uniform float time;
+
 void main(){
 	//ambient
-	vec3 ambient = light.ambient * vec3(texture(material.diffuse, textureCoord));
+	vec3 ambient = light.ambient * texture(material.diffuse, textureCoord).rgb;
 
 	//diffuse
 	vec3 norm = normalize(outNormals);
-	vec3 lightDir = normalize(light.position - fragPos);
+	vec3 lightDir = normalize(-light.direction);
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * (diff * vec3(texture(material.diffuse, textureCoord)));
+	vec3 diffuse = light.diffuse * (diff * texture(material.diffuse, textureCoord).rgb);
 
 	//specular
 	vec3 cameraViewDir = normalize(cameraPos - fragPos);

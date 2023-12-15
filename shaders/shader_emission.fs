@@ -2,13 +2,14 @@
 
 out vec4 outputColor;
 
-in vec2 textureCoord;
 in vec3 outNormals;
+in vec2 textureCoord;
 in vec3 fragPos;
 
 struct Material {
 	sampler2D diffuse;
-	vec3 specular;
+	sampler2D specular;
+	sampler2D emission;
 	float shininess;
 };
 uniform Material material;
@@ -22,6 +23,8 @@ struct Light {
 uniform Light light;
 
 uniform vec3 cameraPos;
+
+uniform float time;
 
 void main(){
 	//ambient
@@ -37,8 +40,15 @@ void main(){
 	vec3 cameraViewDir = normalize(cameraPos - fragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(cameraViewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.specular * (spec * material.specular);
+	vec3 specular = light.specular * (spec * vec3(texture(material.specular, textureCoord)));
 
 	vec3 colorResult = ambient + diffuse + specular;
+
+	if(texture(material.specular, textureCoord).r == 0.0){
+		float emissionCoefficient = 1.0f;
+		vec3 emission = texture(material.emission, textureCoord).rgb * emissionCoefficient;
+		colorResult += emission * sin(time);
+	}
+
 	outputColor = vec4(colorResult, 1.0f);
 }

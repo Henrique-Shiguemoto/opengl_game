@@ -21,7 +21,6 @@ struct Light {
 };
 uniform Light light;
 
-uniform vec3 lightPos;
 uniform vec3 cameraPos;
 
 void main(){
@@ -30,7 +29,7 @@ void main(){
 
 	//diffuse
 	vec3 norm = normalize(outNormals);
-	vec3 lightDir = normalize(lightPos - fragPos);
+	vec3 lightDir = normalize(light.position - fragPos);
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * (diff * vec3(texture(material.diffuse, textureCoord)));
 
