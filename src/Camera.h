@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "main.h"
+#include "types.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -25,8 +25,7 @@ struct Camera{
 	f32 yaw               	= -90.0f;
 	f32 pitch             	= 0.0f;
 	f32 mouseSensitivity 	= 0.2f;
-
-public:
+	
 	glm::mat4 GetViewMatrix();
 	void ProcessMouseMovement(f32 xoffset, f32 yoffset);
 	void ProcessMouseScroll(f32 yoffset);

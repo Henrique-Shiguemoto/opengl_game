@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "main.h"
+#include "types.h"
 
 #define SHADER_MAX_BYTE_SIZE 1024
 

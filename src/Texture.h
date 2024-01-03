@@ -1,17 +1,10 @@
 #pragma once
 
-#include "glad/glad.h"
-#include "main.h"
-#include <iostream>
+#include "types.h"
+#include <string>
 
-class Texture{
-public:
+struct Texture{
 	u32 id;
-	i32 slot;
-
-	Texture(const char* filepath, i32 filterMode, GLenum pixelFormat, i32 slot, b8 generateMipmap);
-	void Activate();
-	void Bind();
-	void Unbind();
-	void Delete();
+	std::string type;
+	std::string path;
 };

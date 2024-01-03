@@ -1,7 +1,9 @@
 #include "Game.h"
 
 i32 main(){
-	Game game("OpenGL Game", WINDOW_WIDTH, WINDOW_HEIGHT, false);
+	std::cout << sizeof(char*) << std::endl;
+
+	Game game("OpenGL Game", WINDOW_WIDTH, WINDOW_HEIGHT);
 	if(!game.isValid) return 1;
 
 	while(game.isRunning){

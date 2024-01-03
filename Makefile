@@ -3,8 +3,8 @@ COMPILER_FLAGS=-g -Wall -Wextra -pedantic -std=c++11 -Wno-unused-parameter
 INCLUDE_PATH=-Isrc/include
 LIBRARY_PATH=-Lsrc/lib
 LINKER_FLAGS=-lmingw32 -lSDL2main -lSDL2
-SRC=src/main.cpp src/glad.c src/Shader.cpp src/VertexBuffer.cpp src/VertexArray.cpp src/IndexBuffer.cpp src/Game.cpp src/Camera.cpp src/Texture.cpp
-OBJS=main.o glad.o Shader.o VertexBuffer.o VertexArray.o IndexBuffer.o Game.o Camera.o Texture.o
+SRC=src/main.cpp src/glad.c src/Shader.cpp src/VertexBuffer.cpp src/VertexArray.cpp src/IndexBuffer.cpp src/Game.cpp src/Camera.cpp src/Texture.cpp src/Window.cpp src/Map.cpp src/Player.cpp src/Light.cpp src/Mesh.cpp src/Model.cpp
+OBJS=main.o glad.o Shader.o VertexBuffer.o VertexArray.o IndexBuffer.o Game.o Camera.o Texture.o Window.o Player.o Map.o Light.o Mesh.o Model.o
 BIN=src/main.exe
 DEBUGGER=gdb
 

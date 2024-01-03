@@ -1,18 +1,29 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "types.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
-struct Light {
-	glm::vec3 		lightPos 						= glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 		lightColor 						= glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 		diffuseColor 					= glm::vec3(1.0f);
-	glm::vec3 		ambientColor 					= glm::vec3(0.1f);
-	glm::vec3 		specularColor 					= glm::vec3(1.0f);
-	glm::vec3  		dimension_f 					= glm::vec3(0.25f);
-	b8 				lightHasToMoveLeft		      	= false;
-	b8 				lightHasToMoveRight		     	= false;
-	b8 				lightHasToMoveUp		  	  	= false;
-	b8 				lightHasToMoveDown		      	= false;
-	b8 				lightHasToMoveForward 			= false;
-	b8 				lightHasToMoveBack 				= false;
+class Light {
+public:
+	Light(glm::vec3 pos, glm::vec3 dimension, glm::vec3 color, glm::vec3 diffuse, glm::vec3 ambient, glm::vec3 specular);
+
+	glm::vec3 pos;
+	glm::vec3 color;
+	glm::vec3 diffuse;
+	glm::vec3 ambient;
+	glm::vec3 specular;
+	glm::vec3 dimension;
+	b8 hasToMoveLeft = false;
+	b8 hasToMoveRight = false;
+	b8 hasToMoveUp = false;
+	b8 hasToMoveDown = false;
+	b8 hasToMoveForward = false;
+	b8 hasToMoveBack = false;
+
+	VertexArray* vaoLight = nullptr;
+	VertexBuffer* vboLight = nullptr;
+	IndexBuffer* iboLight = nullptr;
 };
